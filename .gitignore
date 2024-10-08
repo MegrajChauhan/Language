@@ -2,3 +2,5 @@ build
 a.out
 .vscode
 main
+temp.c
+test.c
