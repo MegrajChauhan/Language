@@ -8,20 +8,7 @@
 #include <vector>
 #include <unordered_set>
 #include "log.hpp"
-
-struct Details
-{
-    size_t lstart, lend;
-};
-
-struct File
-{
-    std::string _file_contents;
-    Details fdetails;
-    std::string fpath;
-    std::vector<File> next_files;
-    File *parent;
-};
+#include "defs.hpp"
 
 class Input
 {

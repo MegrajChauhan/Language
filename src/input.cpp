@@ -70,6 +70,8 @@ bool Input::first_pass(size_t _start)
                 break;
             std::string temp;
             auto i2 = iter + 1;
+            while (std::isspace(*i2))
+                i2++;
             while (*i2 != '\n')
             {
                 temp += *i2;

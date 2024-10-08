@@ -14,19 +14,17 @@ var name: u8[] = {}; // Error(unknown length)
 var name1: u8[13] = {}; // allowed(random values)
 var name2: u8[] = "Hello Yo"; // allowed(auto length detection) and also adds a null terminator
 
-var ptr: *u8 = &name; // allowed
-var ptr1: **u8 = &ptr; // pointer to a pointer
-var ptr2: const *u8 = &num; // a pointer to a constant value
-const ptr2again: const *u8 = &num; // a pointer to a constant value but it cannot point to anything else
-const constptr: *const *u8 = &ptr2again; // pointer to a pointer of a constant value
+// var ptr: *u8 = &name; // allowed
+// var ptr1: **u8 = &ptr; // pointer to a pointer
+// var ptr2: const *u8 = &num; // a pointer to a constant value
+// const ptr2again: const *u8 = &num; // a pointer to a constant value but it cannot point to anything else
+// const constptr: *const *u8 = &ptr2again; // pointer to a pointer of a constant value
 
-const a_null: *void = null; // NULL pointer
+// const a_null: *void = null; // NULL pointer
 
 // const variables must be assigned immediately
 
-$   include  //(examples/example.l)
-//$include(example/example.l)
-
+$include(example/example.l)
 
 // Namespaces may be exported and used.
 
@@ -51,7 +49,7 @@ global Temp
   {
     hello: u8[12];
     is_okay: bool;
-
+@
     fn init(this: *Name, msg: u8[], state: bool) void
     {
       this->hello = msg;
@@ -63,7 +61,8 @@ global Temp
       if (self->is_okay == false)
          return false;
       return true;
-    } 
+    }
+@ 
   };
 
   var instance: Name = Name(); // instance of Name
