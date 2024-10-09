@@ -35,7 +35,6 @@ bool vec_push(vec *v, void *elem)
 
     memcpy((char *)v->buf + (v->count * v->elen), elem, v->elen);
     v->count++;
-
     return true;
 }
 
