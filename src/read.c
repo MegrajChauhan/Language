@@ -82,10 +82,79 @@ bool gen_file_context_tree(file_context *entry, uset *inc_list)
     if (!uset_insert(inc_list, entry->entry.fname))
         return false;
     register char *iter = entry->entry.stream;
-    register size_t cstart = 0, lstart = 0, ostart = 0;
-    while (*iter != 0)   
+    register size_t cstart = 0, lstart = 1, ostart = 0;
+    while (*iter != 0)
     {
-              
+        if (*iter == '\n')
+        {
+            iter++;
+            lstart++;
+        }
+        else if (*iter == '/' && *(iter + 1) == '/')
+            while (*iter != '\n' && *iter != '\0')
+                iter++;
+        else if (*iter == '@')
+        {
+            size_t temp = lstart;
+            while (*iter != '@' && *iter != 0)
+            {
+                if (*iter == '\n')
+                    lstart++;
+                iter++;
+            }
+            if (*iter == 0)
+            {
+                // where is the '@'
+                fprintf(stderr, "ERROR: Multi-line comment was not terminated. Stray '@' in file '%s', line %lu.\n", entry->entry.fname, temp);
+                return false;
+            }
+        }
+        else if (*iter == '#')
+        {
+            size_t temp = lstart;
+            while (*iter != '#' && *iter != 0)
+            {
+                if (*iter == '\n')
+                    lstart++;
+                iter++;
+            }
+            if (*iter == 0)
+            {
+                // where is the '#'?
+                fprintf(stderr, "ERROR: Block was never ended. Stray '#' in file '%s', line %lu.\n", entry->entry.fname, temp);
+                return false;
+            }
+        }
+        else if (*iter == '$')
+        {
+            // this is where we deal with the include
+            size_t temp = lstart;
+            iter++;
+            while (IsSpace(*iter) && *iter != 0)
+            {
+                if (*iter == '\n')
+                    lstart++;
+                iter++;
+            }
+            if (iter == 0 || !IsAlpha(*iter))
+            {
+                fprintf(stderr, "ERROR: Expected 'include', 'assembly' or '..(in future)..' after '$' in file '%s', line %lu.\n", entry->entry.fname, temp);
+                return false;
+            }
+            slice s;
+            s._s = iter;
+            while (IsAlpha(*iter) && *iter != 0)
+            {
+                iter++;
+            }
+            s._e = iter;
+            if (strncmp(s._s, "assembly", s._e - s._s) == 0)
+            {
+                // an assembly(ignore right now but we should remember this somehow)
+                /// TODO: Finish me
+                
+            }
+        }
     }
     return true;
 }

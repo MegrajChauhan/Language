@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include "umap.h"
 
 typedef struct file file;
 typedef struct file_context file_context;

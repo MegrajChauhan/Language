@@ -4,6 +4,7 @@
 #include "defs.h"
 #include "file_context.h"
 #include "uset.h"
+#include "maps.h"
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
