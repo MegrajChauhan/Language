@@ -37,16 +37,10 @@ context *create_context(char *input_fname)
     return c;
 }
 
-bool init_file_context(file_context *fc, char *fname)
+void destroy_context(context *c)
 {
-    fc->children = NULL;
-    fc->col = 0;
-    fc->entry.fname = strdup(fname);
-    if (!fc->entry.fname)
-        return false;
-    // it is the reader's job to verify the file and open it
-    fc->line = 0;
-    fc->offset = 0;
-    fc->parent = NULL; // set manually
-    return true;
+    destroy_file_context(c->fcont);
+    uset_destroy(c->_included_files);
+    error_destroy(c->errors);
+    free(c);
 }

@@ -25,6 +25,7 @@ struct file_context
     size_t offset;
     file_context *parent;
     file_context **children; // the child contexts
+    size_t children_count;
 };
 
 // This contains just the definitions and no functions to manipulate them

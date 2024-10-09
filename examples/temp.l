@@ -24,7 +24,20 @@ var name2: u8[] = "Hello Yo"; // allowed(auto length detection) and also adds a 
 
 // const variables must be assigned immediately
 
-$include(example/example.l)
+// instead of macros, we will introduce built-in functions
+
+$include (examples/example.l) // this is included right away
+
+#
+  // the code here is executed at compile time and we may make this more versatile with time
+  // perform things platform-specific
+  if (platformOs == "linux") 
+    $include (examples/example.l)
+  
+  // we keep this simple so no else and else if
+  // we only need this to include platform-specific thing so no extra needs
+  // we could expand in future.
+#
 
 // Namespaces may be exported and used.
 

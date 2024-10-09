@@ -5,6 +5,7 @@
 #include "uset.h"
 #include "read.h"
 #include "error.h"
+#include "file_context.h"
 
 typedef struct context context;
 
@@ -18,7 +19,5 @@ struct context
 context *create_context(char *input_fname);
 
 void destroy_context(context *c);
-
-bool init_file_context(file_context *fc, char *fname);
 
 #endif
