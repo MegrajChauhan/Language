@@ -26,7 +26,11 @@ uset *uset_init(size_t bucket_count);
 
 bool uset_insert(uset *set, const char *key);
 
+bool uset_insert_slice(uset *set, slice *s);
+
 bool uset_contains(uset *set, const char *key);
+
+bool uset_contains_slice(uset *set, slice *s);
 
 void uset_destroy(uset *set);
 

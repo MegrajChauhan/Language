@@ -55,3 +55,20 @@ size_t hash_string(const char *key, size_t bucket_count)
 {
     return murmurhash3(key, strlen(key), 0) % bucket_count;
 }
+
+bool get_filename_from_path(slice *path)
+{
+    // just get the filename and that is all
+    // start from end and go back until the start or a separator
+    /// NOTE: This method implies there cannot be multiple files sharing name, even across
+    // multiple folders
+    if (!path)
+        return false;
+    char *tmp = path->_e;
+    while (tmp != path->_s && *tmp != SEPARATOR)
+    {
+        tmp--;
+    }
+    path->_s = (*tmp == SEPARATOR) ? ++tmp : tmp;
+    return true;
+}

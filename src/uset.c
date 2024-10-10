@@ -66,6 +66,15 @@ bool uset_insert(uset *set, const char *key)
     return true;
 }
 
+bool uset_insert_slice(uset *set, slice *s)
+{
+    size_t len = (s->_e - s->_s);
+    char key[len + 1];
+    memcpy(key, s->_s, len);
+    key[len] = 0;
+    return uset_insert(set, key);
+}
+
 bool uset_contains(uset *set, const char *key)
 {
     size_t index = hash_string(key, set->bucket_count);
@@ -78,6 +87,15 @@ bool uset_contains(uset *set, const char *key)
         entry = entry->next;
     }
     return false;
+}
+
+bool uset_contains_slice(uset *set, slice *s)
+{
+    size_t len = (s->_e - s->_s);
+    char key[len + 1];
+    memcpy(key, s->_s, len);
+    key[len] = 0;
+    return uset_contains(set, key);
 }
 
 void uset_destroy(uset *set)

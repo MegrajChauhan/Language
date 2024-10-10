@@ -8,7 +8,7 @@
 #include "vec.h"
 
 #ifndef NONO
-#define Assert(cond) ((cond)? NULL: fprintf(stderr, "Assertion '%s' failed.\nFILE: %s\nLINE: %lu\n", #cond, __FILE__, __LINE__))
+#define Assert(cond) ((cond)? 0: fprintf(stderr, "Assertion '%s' failed.\nFILE: %s\nLINE: %lu\n", #cond, __FILE__, __LINE__))
 #else
 #define Assert(cond)
 #endif
