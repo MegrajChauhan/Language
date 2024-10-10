@@ -18,6 +18,8 @@ struct context
 
 context *create_context(char *input_fname);
 
+bool context_make_first_pass(context *c);
+
 void destroy_context(context *c);
 
 #endif

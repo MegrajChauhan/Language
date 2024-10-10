@@ -14,7 +14,7 @@ error *error_init()
     return e;
 }
 
-bool error_add(error *e, file_context *fcont, uint64_t kind, size_t els, size_t ele, size_t os, size_t oe, size_t cs, size_t ce)
+void error_add(error *e, file_context *fcont, uint64_t kind, size_t els, size_t ele, size_t os, size_t oe, size_t cs, size_t ce)
 {
     Assert(e == NULL);
     Assert(fcont == NULL);
@@ -27,9 +27,18 @@ bool error_add(error *e, file_context *fcont, uint64_t kind, size_t els, size_t 
     ent.offset_ed = oe;
     ent.col_st = cs;
     ent.col_ed = ce;
-    return vec_push(e->entries, (void *)(&ent));
+    if (!vec_push(e->entries, (void *)(&ent)))
+    {
+        // error handler getting error itself is unacceptable
+        // so we terminate violently here
+        fprintf(stderr, "ERROR_HANDLER_INSANITY\n");
+        exit(EXIT_FAILURE);
+    }
 }
-// void error_evaluate(error* e);
+void error_evaluate(error *e)
+{
+    // print the errors
+}
 
 void error_destroy(error *e)
 {

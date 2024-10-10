@@ -80,20 +80,16 @@ bool umap_insert(umap *map, char *key, uint64_t value)
 // Find an entry by key
 umap_entry *umap_find(umap *map, slice *s)
 {
-    const char *key = slice_to_cstr(s);
-    if (!key)
-    {
-        map->_e = true;
-        return NULL; // Handle memory allocation failure
-    }
+    size_t len = (s->_e - s->_s);
+    char key[len + 1];
+    key[len] = 0;
+    memcpy(key, s->_s, len);
     size_t index = hash_string(key, map->bucket_count);
     // Check if the bucket is in use
     if (map->buckets[index].key != NULL && strcmp(map->buckets[index].key, key) == 0)
     {
-        free(key);                   // Free allocated key
         return &map->buckets[index]; // Found the entry
     }
-    free(key);   // Free allocated key
     return NULL; // Not found
 }
 

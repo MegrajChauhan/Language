@@ -44,3 +44,10 @@ void destroy_context(context *c)
     error_destroy(c->errors);
     free(c);
 }
+
+bool context_make_first_pass(context *c)
+{
+    if (!gen_file_context_tree(c->fcont, c->_included_files))
+        return false;
+    return true;
+}

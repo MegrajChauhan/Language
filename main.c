@@ -3,6 +3,11 @@
 
 int main()
 {
+    if (!gen_map())
+    {
+        printf("GEN MAP\n");
+        return 0;
+    }
     char name[] = "examples/temp.l";
     context *c = create_context(name);
     if (!c)
@@ -15,5 +20,6 @@ int main()
         printf("GEN TREE\n");
     }
     destroy_context(c);
+    rid_of_map();
     return 0;
 }

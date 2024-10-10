@@ -1,0 +1,1 @@
+1. In a variable definition statement, everything after '=' to ';' is an expression.

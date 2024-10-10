@@ -17,6 +17,7 @@
 enum
 {
     CANNOT_BUILD_TOKEN,
+    DOUBLE_DOTS_FLOAT, // more than one '.' in a floating point number
 };
 
 typedef struct error error;
@@ -26,6 +27,9 @@ struct error_entry
 {
     file_context *error_context; // the file where the error occured
     uint64_t kind;               // kind of error(for context)
+
+    // in case of lexers, both endings and startings would be the same
+    // but this extra info will be useful with parsers and semantic analysis
     size_t err_line_st;
     size_t err_line_ed;
     size_t offset_st;
@@ -41,9 +45,9 @@ struct error
 
 error *error_init();
 
-bool error_add(error *e, file_context *fcont, uint64_t kind, size_t els, size_t ele, size_t os, size_t oe, size_t cs, size_t ce);
+void error_add(error *e, file_context *fcont, uint64_t kind, size_t els, size_t ele, size_t os, size_t oe, size_t cs, size_t ce);
 
-// void error_evaluate(error* e);
+void error_evaluate(error* e);
 
 void error_destroy(error *e);
 
