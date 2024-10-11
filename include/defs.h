@@ -9,6 +9,7 @@
 
 typedef struct file file;
 typedef struct file_context file_context;
+typedef struct type type;
 
 struct file
 {
@@ -68,7 +69,7 @@ enum
     // Data structures
     ENUM,
     STRUCT,
-    
+
     /* OPERATORS */
 
     /* single character operators */
@@ -107,11 +108,33 @@ enum
     NUM_INT,
     NUM_FLOAT,
     IDENTIFIER,
-    
+
     REQUEST, // The parser makes a request for something to which this token is returned
 
     eof,
-    
+
+};
+
+// Base types
+enum
+{
+    SIGNED_BYTE,
+    SIGNED_WORD,
+    SIGNED_DWORD,
+    SIGNED_QWORD,
+    UNSIGNED_BYTE,
+    UNSIGNED_WORD,
+    UNSIGNED_DWORD,
+    UNSIGNED_QWORD,
+    ARRAY,
+    VOID, // this is for the functions only
+};
+
+struct type
+{
+    uint64_t base;
+    bool _const;
+    type *next;
 };
 
 #endif
