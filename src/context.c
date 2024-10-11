@@ -51,3 +51,20 @@ bool context_make_first_pass(context *c)
         return false;
     return true;
 }
+
+bool context_parse_file_tree(context *c)
+{
+    lexer *l = lexer_init(c->fcont, c->errors);
+    if (!l)
+        return false;
+    token t;
+    while (true)
+    {
+        bool res = lexer_next_token(l, &t);
+        if (t.kind == eof)
+            break;
+    }
+    error_evaluate(c->errors);
+    destroy_lexer(l);
+    return true;
+}

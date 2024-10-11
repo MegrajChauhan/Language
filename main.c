@@ -15,10 +15,12 @@ int main()
         printf("CREATE CONTEXT\n");
         return 0;
     }
-    if (!gen_file_context_tree(c->fcont, c->_included_files))
+    if (!context_make_first_pass(c))
     {
-        printf("GEN TREE\n");
+        printf("FIRST PASS\n");
+        return 0;
     }
+    context_parse_file_tree(c);
     destroy_context(c);
     rid_of_map();
     return 0;

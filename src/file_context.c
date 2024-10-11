@@ -8,7 +8,7 @@ bool init_file_context(file_context *fc, char *fname)
     if (!fc->entry.fname)
         return false;
     // it is the reader's job to verify the file and open it
-    fc->line = 0;
+    fc->line = 1;
     fc->offset = 0;
     fc->parent = NULL; // set manually
     fc->children_count = 0;

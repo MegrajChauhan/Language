@@ -7,7 +7,7 @@
 // I don't want macros
 // I like the types from Zig but we can't have something like u4 or u31 which feels weird.
 var a: u8 = 12;
-const num: u32 = 9727412;
+const num: u32 = 9727412.35453.555;
 
 // Similary 'f32', 'f64' and 'i8', '16' etc for signed
 var name: u8[] = {}; // Error(unknown length)

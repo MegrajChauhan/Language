@@ -63,7 +63,7 @@ bool gen_file_context_stream(file_context *fc)
     }
     fread(fc->entry.stream, 1, flen, fc->entry.f); // should not fail
     fc->entry.stream_len = flen;
-    fc->entry.stream[flen - 1] = 0; // terminate
+    fc->entry.stream[flen] = 0; // terminate
     return true;
 }
 

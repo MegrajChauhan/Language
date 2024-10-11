@@ -109,6 +109,8 @@ enum
     IDENTIFIER,
     
     REQUEST, // The parser makes a request for something to which this token is returned
+
+    eof,
     
 };
 

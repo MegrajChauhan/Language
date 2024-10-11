@@ -51,4 +51,8 @@ void error_evaluate(error* e);
 
 void error_destroy(error *e);
 
+void __cannot_built_token(error_entry* e);
+
+void __double_dots_float(error_entry* e);
+
 #endif

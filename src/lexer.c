@@ -19,43 +19,46 @@ void destroy_lexer(lexer *l)
 
 bool lexer_next_token(lexer *l, token *t)
 {
-    register size_t c_st = 0, o_st = 0;
-    register char *i = l->iter;
-    while (*i != 0)
+    while (true)
     {
-        if (IsSpace(*i))
+        if (*l->iter == 0)
         {
-            while (IsSpace(*i))
-                consume(l);
-            i = l->iter;
+            t->kind = eof;
+            break;
         }
-        else if (IsStrInclusive(*i))
+        if (IsSpace(*l->iter))
+        {
+            while (IsSpace(*l->iter))
+                consume(l);
+        }
+        else if (IsNum(*l->iter))
+        {
+            if (!group_number(l, t))
+            {
+                consume(l);
+                return false;
+            }
+            break;
+        }
+        else if (IsStrInclusive(*l->iter))
         {
             group_characters(l, t);
             break;
         }
-        else if (IsNum(*i))
-        {
-            if (!group_number(l, t))
-                return false;
-            break;
-        }
-        else if (*i == '/' && *(i + 1) == '/')
+        else if (*l->iter == '/' && *(l->iter + 1) == '/')
         {
             // a comment!
             while (*l->iter != 0 && *l->iter != '\n')
                 consume(l);
-            i = l->iter;
         }
-        else if (*i == '@')
+        else if (*l->iter == '@')
         {
             // we confirm the multi-line comments being valid during the first pass
             // there is hence no concern
-            i++;
+            consume(l);
             while (*l->iter != 0 && *l->iter != '@')
                 consume(l);
-            l->iter++;
-            i = l->iter;
+            consume(l);
         }
         else
         {
@@ -63,8 +66,8 @@ bool lexer_next_token(lexer *l, token *t)
             t->col = l->context->col;
             t->line = l->context->line;
             t->offset = l->context->offset;
-            t->value._s = i;
-            switch (*i)
+            t->value._s = l->iter;
+            switch (*l->iter)
             {
             case '$':
                 t->kind = INC_DOLLAR;
@@ -80,11 +83,11 @@ bool lexer_next_token(lexer *l, token *t)
                 break;
             case '=':
             {
-                switch (*(i + 1))
+                switch (*(l->iter + 1))
                 {
                 case '=':
                     t->kind = EQUALS;
-                    i++;
+                    consume(l);
                     break;
                 default:
                     t->kind = ASSIGN;
@@ -103,6 +106,9 @@ bool lexer_next_token(lexer *l, token *t)
             case '}':
                 t->kind = CLOSE_CURLY;
                 break;
+            case '[':
+                t->kind = OPEN_BIGBRAC;
+                break;
             case ']':
                 t->kind = CLOSE_BIGBRAC;
                 break;
@@ -119,11 +125,12 @@ bool lexer_next_token(lexer *l, token *t)
             {
                 // error
                 error_add(l->err, l->context, CANNOT_BUILD_TOKEN, t->line, t->line, t->offset, t->offset + 1, t->col, t->col + 1);
+                consume(l);
                 return false;
             }
             }
-            t->value._e = (i++);
-            l->iter = i;
+            consume(l);
+            t->value._e = l->iter;
             break;
         }
     }
@@ -143,12 +150,11 @@ void consume(lexer *l)
     {
         l->context->col = 0;
         l->context->line++;
-        l->context->offset++;
-        l->iter++;
     }
     else
         l->context->col++;
     l->iter++;
+    l->context->offset++;
 }
 
 bool group_number(lexer *l, token *t)
@@ -173,7 +179,7 @@ bool group_number(lexer *l, token *t)
     // we have our number
     // even if the number ends with a '.'
     // it is acceptable
-    t->value._e = (l->iter - 1);
+    t->value._e = (l->iter);
     t->col = c_st;
     t->kind = (dot_count == 0) ? NUM_INT : NUM_FLOAT;
     t->line = l->context->line;
@@ -187,15 +193,13 @@ bool group_characters(lexer *l, token *t)
     t->value._s = l->iter;
     size_t c_st = l->context->col;
     size_t o_st = l->context->offset;
-    char *i = l->iter;
-    while (*i != 0 && IsStrInclusive(*i))
+    while (*l->iter != 0 && IsStrInclusive(*l->iter))
         consume(l);
-    t->value._e = (i - 1);
+    t->value._e = (l->iter);
     if (!find_key(&t->value, &t->kind))
         t->kind = IDENTIFIER;
     t->col = c_st;
     t->line = l->context->line;
     t->offset = o_st;
-    l->iter = i;
     return true;
 }

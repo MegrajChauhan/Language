@@ -6,6 +6,7 @@
 #include "read.h"
 #include "error.h"
 #include "file_context.h"
+#include "lexer.h"
 
 typedef struct context context;
 
@@ -19,6 +20,8 @@ struct context
 context *create_context(char *input_fname);
 
 bool context_make_first_pass(context *c);
+
+bool context_parse_file_tree(context *c);
 
 void destroy_context(context *c);
 
