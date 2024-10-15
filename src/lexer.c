@@ -137,6 +137,20 @@ bool lexer_next_token(lexer *l, token *t)
     return true;
 }
 
+bool lexer_peek_token(lexer *l, token *t)
+{
+    size_t col = l->context->col;
+    size_t line = l->context->line;
+    size_t off = l->context->offset;
+    char *i = l->iter;
+    bool ret = lexer_next_token(l, t);
+    l->context->col = col;
+    l->context->line = line;
+    l->context->offset = off;
+    l->iter = i;
+    return ret;
+}
+
 char peek(lexer *l)
 {
     return (*l->iter == 0) ? 0 : *(l->iter + 1);

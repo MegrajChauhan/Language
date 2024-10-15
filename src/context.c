@@ -1,5 +1,16 @@
 #include "context.h"
 
+static void context_clear_namespace(namespace *ns)
+{
+    for (size_t i = 0; i < ns->children->count; i++)
+    {
+        namespace *x = vec_at(ns->children, i);
+        context_clear_namespace(x);
+    }
+    // No worries about node
+    namespace_destroy(ns);
+}
+
 context *create_context(char *input_fname)
 {
     context *c = (context *)malloc(sizeof(context));
@@ -34,11 +45,21 @@ context *create_context(char *input_fname)
         free(c);
         return NULL;
     }
+    if (!(c->ns = namespace_init(NULL)))
+    {
+        destroy_file_context(c->fcont);
+        uset_destroy(c->_included_files);
+        error_destroy(c->errors);
+        free(c->fcont);
+        free(c);
+        return NULL;
+    }
     return c;
 }
 
 void destroy_context(context *c)
 {
+    context_clear_namespace(c->ns);
     destroy_file_context(c->fcont);
     uset_destroy(c->_included_files);
     error_destroy(c->errors);

@@ -18,6 +18,8 @@ enum
 {
     CANNOT_BUILD_TOKEN,
     DOUBLE_DOTS_FLOAT, // more than one '.' in a floating point number
+
+    UNEXPECTED_TOKEN,
 };
 
 typedef struct error error;

@@ -14,11 +14,13 @@ enum
     ARR_DECLR,
 };
 
+typedef struct type type;
 typedef struct node node;
+typedef struct expression_nodes expression_nodes;
 typedef struct expression expression;
 
 typedef struct node_var_declr node_var_declr;
-typedef struct node_arr_declr node_arr_declr;
+
 
 struct node
 {
@@ -29,33 +31,32 @@ struct node
     size_t o_st, o_ed;
 };
 
+struct expression_nodes
+{
+    slice val;
+    uint64_t type;
+};
+
 struct expression
 {
-    vec *tokens;
+    vec *nodes;
     uint64_t _type; // could be any kind
                     // an array assignment needs to be evaluated differently
                     // than a regular expression
     bool must_eval; // the expression must be evaluated at compile-time?
 };
 
+struct type
+{
+    uint64_t base;
+    type *next;
+    expression expr;
+};
 struct node_var_declr
 {
     slice name;
     expression expr;
     type *_t;
-    // in array declaration, the value in-between '[]'
-    // is also an expression
-    // but that happens only in the case of an array
-    // having an extra field for arrays that is useless for others is a bit
-    // too much so we will have a different node for this
-    // Though the given length should have been stored as type information
-    // we won't complicate it there
-};
-
-struct node_arr_declr
-{
-    node_var_declr _info; // the same info
-    expression _len_expr;
 };
 
 #endif

@@ -7,6 +7,7 @@
 #include "error.h"
 #include "file_context.h"
 #include "lexer.h"
+#include "namespace.h"
 
 typedef struct context context;
 
@@ -15,6 +16,7 @@ struct context
     uset *_included_files; // all of the included files
     file_context *fcont;   // the entry context
     error *errors;
+    namespace *ns;
 };
 
 context *create_context(char *input_fname);

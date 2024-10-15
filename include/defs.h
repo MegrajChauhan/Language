@@ -9,7 +9,6 @@
 
 typedef struct file file;
 typedef struct file_context file_context;
-typedef struct type type;
 
 struct file
 {
@@ -126,15 +125,11 @@ enum
     UNSIGNED_WORD,
     UNSIGNED_DWORD,
     UNSIGNED_QWORD,
+    FLOAT,
+    DOUBLE,
+    TCONST,
     ARRAY,
-    VOID, // this is for the functions only
-};
-
-struct type
-{
-    uint64_t base;
-    bool _const;
-    type *next;
+    TVOID, // this is for the functions only
 };
 
 #endif

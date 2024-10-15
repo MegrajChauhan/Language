@@ -36,6 +36,8 @@ lexer *lexer_init(file_context *fc, error *e);
 
 bool lexer_next_token(lexer *l, token *t);
 
+bool lexer_peek_token(lexer *l, token *t);
+
 void destroy_lexer(lexer *l);
 
 /* UTILITIES */
