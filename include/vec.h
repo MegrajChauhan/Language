@@ -28,6 +28,8 @@ bool vec_pop(vec *v);
 
 void *vec_at(vec *v, size_t ind);
 
+bool vec_crunch(vec *v);
+
 void vec_destroy(vec *v);
 
 #endif

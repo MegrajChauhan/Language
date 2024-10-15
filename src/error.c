@@ -14,7 +14,7 @@ error *error_init()
     return e;
 }
 
-void error_add(error *e, file_context *fcont, uint64_t kind, size_t els, size_t ele, size_t os, size_t oe, size_t cs, size_t ce)
+void error_add(error *e, void* err, file_context *fcont, uint64_t kind, size_t els, size_t ele, size_t os, size_t oe, size_t cs, size_t ce)
 {
     Assert(e != NULL);
     Assert(fcont != NULL);
@@ -27,6 +27,7 @@ void error_add(error *e, file_context *fcont, uint64_t kind, size_t els, size_t 
     ent.offset_ed = oe;
     ent.col_st = cs;
     ent.col_ed = ce;
+    ent.err = err;
     if (!vec_push(e->entries, (void *)(&ent)))
     {
         // error handler getting error itself is unacceptable
@@ -35,6 +36,7 @@ void error_add(error *e, file_context *fcont, uint64_t kind, size_t els, size_t 
         exit(EXIT_FAILURE);
     }
 }
+
 void error_evaluate(error *e)
 {
     // print the errors
@@ -102,3 +104,24 @@ void __double_dots_float(error_entry *e)
         putc('^', stderr);
     putc('\n', stderr);
 }
+
+// void __unexpected_token(file_context *fcont, size_t els, size_t ele, size_t os, size_t oe, size_t cs, size_t ce, char *exp)
+// {
+//     fprintf(stderr, "%s:%lu:%lu: Unexpected '%s' when expecting '%c'.\n", fcont->entry.fname, els, cs, exp, *(fcont->entry.stream + os));
+//     fprintf(stderr, "LINE:\n\t");
+//     char *i = fcont->entry.stream + (os - cs);
+//     while (*i != '\n')
+//     {
+//         putc(*i, stderr);
+//         i++;
+//     }
+//     putc('\n', stderr);
+//     putc('\t', stderr);
+//     for (size_t i = 0; i < cs; i++)
+//     {
+//         putc(' ', stderr);
+//     }
+//     for (size_t i = cs; i < ce; i++)
+//         putc('^', stderr);
+//     putc('\n', stderr);
+// }

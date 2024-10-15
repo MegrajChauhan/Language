@@ -8,7 +8,7 @@
 #include "vec.h"
 
 #ifndef NONO
-#define Assert(cond) ((cond)? 0: fprintf(stderr, "Assertion '%s' failed.\nFILE: %s\nLINE: %lu\n", #cond, __FILE__, __LINE__))
+#define Assert(cond) ((cond) ? 0 : fprintf(stderr, "Assertion '%s' failed.\nFILE: %s\nLINE: %lu\n", #cond, __FILE__, __LINE__))
 #else
 #define Assert(cond)
 #endif
@@ -24,6 +24,7 @@ enum
 
 typedef struct error error;
 typedef struct error_entry error_entry;
+typedef struct error_unexp_tok error_unexp_tok;
 
 struct error_entry
 {
@@ -38,6 +39,14 @@ struct error_entry
     size_t offset_ed;
     size_t col_st;
     size_t col_ed;
+
+    void *err;
+};
+
+struct error_unexp_tok
+{
+    slice got;
+    uint64_t exp; // we need to get a "TYPE to STR" thing now
 };
 
 struct error
@@ -47,14 +56,16 @@ struct error
 
 error *error_init();
 
-void error_add(error *e, file_context *fcont, uint64_t kind, size_t els, size_t ele, size_t os, size_t oe, size_t cs, size_t ce);
+void error_add(error *e, void *err, file_context *fcont, uint64_t kind, size_t els, size_t ele, size_t os, size_t oe, size_t cs, size_t ce);
 
-void error_evaluate(error* e);
+void error_evaluate(error *e);
 
 void error_destroy(error *e);
 
-void __cannot_built_token(error_entry* e);
+void __cannot_built_token(error_entry *e);
 
-void __double_dots_float(error_entry* e);
+void __double_dots_float(error_entry *e);
+
+// void __unexpected_token(file_context *fcont, size_t els, size_t ele, size_t os, size_t oe, size_t cs, size_t ce, char *exp);
 
 #endif

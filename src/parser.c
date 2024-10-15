@@ -13,6 +13,8 @@ parser *parser_init(file_context *fc, error *e, namespace *ns)
     p->err = e;
     p->ns = ns;
     p->ns->_global = false; // the main namespace(a child can be global though)
+    p->_stat = false;
+    p->err = false;
     return p;
 }
 
@@ -28,7 +30,49 @@ bool parser_check_token(parser *p, token *t, uint64_t exp)
     size_t len = t->value._e - t->value._s;
     if (t->kind != exp)
     {
-        error_add(p->err, p->lex->context, UNEXPECTED_TOKEN, t->line, t->line, t->offset, t->offset + len, t->col, t->col + len);
+        return false;
+    }
+    return true;
+}
+
+bool parse_add_expression(parser *p, expression *expr, uint64_t until)
+{
+    token tok;
+    expr->nodes = vec_init(5, sizeof(expression_nodes));
+    if (!expr->nodes)
+    {
+        internal_err();
+        return false;
+    }
+    while (true)
+    {
+        if (!lexer_peek_token(p->lex, &tok))
+            return false;
+        if (tok.kind == until)
+        {
+            lexer_next_token(p->lex, &tok);
+            break;
+        }
+        if (tok.kind == eof)
+        {
+            // this is fatal
+        }
+        /// NOTE: We are not checking of the token is valid for an expression here.
+        /// That extra check can be done with the expression evaluator which eases things
+        expression_nodes n;
+        n.type = tok.kind;
+        n.val._s = tok.value._s;
+        n.val._e = tok.value._e;
+        if (!vec_push(expr->nodes, &n))
+        {
+            internal_err();
+            return false;
+        }
+        lexer_next_token(p->lex, &tok);
+    }
+    if (!vec_crunch(expr->nodes))
+    {
+        internal_err();
         return false;
     }
     return true;
@@ -94,10 +138,18 @@ bool parser_gen_type(parser *p, type *t)
             token _t;
             if (!lexer_peek_token(p->lex, &_t))
                 return false;
-            switch(_t.kind)
+            curr->base = ARRAY;
+            switch (_t.kind)
             {
-                case CLOSE_BIGBRAC:
-                 // nothing, so 
+            case CLOSE_BIGBRAC:
+                // nothing, so we need to figure out the length ourselves
+                p->_stat = true;
+                p->f1 = true;
+                break;
+            default:
+                // by default, this becomes an expression
+                if (!parse_add_expression(p, &curr->expr, CLOSE_BIGBRAC))
+                    return false;
             }
         }
         default:
@@ -107,6 +159,7 @@ bool parser_gen_type(parser *p, type *t)
     // we leave this for a later step to perform
     // we will need extreme checks and analysis on each node so everything makes sense
     // since we need it anyway, we will leave this for later
+    return true;
 }
 
 bool parse_var_declr(parser *p, bool _const)

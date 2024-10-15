@@ -18,6 +18,11 @@ struct parser
     error *err;
     namespace *ns; // the first one is unnamed which is the global namespace for one file
                    // one included file is a child namespace for the main file
+
+    // status flags
+    bool _stat;
+    bool err;
+    bool f1, f2, f3; // any interpretation based on context
 };
 
 parser *parser_init(file_context *fc, error *e, namespace *ns);
@@ -25,6 +30,8 @@ parser *parser_init(file_context *fc, error *e, namespace *ns);
 void parser_destroy(parser *p);
 
 bool parse(parser *p);
+
+bool parse_add_expression(parser *p, expression *expr, uint64_t until);
 
 bool parse_var_declr(parser *p, bool _const);
 

@@ -124,7 +124,7 @@ bool lexer_next_token(lexer *l, token *t)
             default:
             {
                 // error
-                error_add(l->err, l->context, CANNOT_BUILD_TOKEN, t->line, t->line, t->offset, t->offset + 1, t->col, t->col + 1);
+                error_add(l->err, NULL, l->context, CANNOT_BUILD_TOKEN, t->line, t->line, t->offset, t->offset + 1, t->col, t->col + 1);
                 consume(l);
                 return false;
             }
@@ -185,7 +185,7 @@ bool group_number(lexer *l, token *t)
             dot_count++;
         if (dot_count > 1)
         {
-            error_add(l->err, l->context, DOUBLE_DOTS_FLOAT, l->context->line, l->context->line, o_st, l->context->offset, c_st, l->context->col);
+            error_add(l->err, NULL, l->context, DOUBLE_DOTS_FLOAT, l->context->line, l->context->line, o_st, l->context->offset, c_st, l->context->col);
             return false;
         }
         consume(l);

@@ -55,6 +55,19 @@ void *vec_at(vec *v, size_t ind)
     return (char *)v->buf + (ind * v->elen);
 }
 
+bool vec_crunch(vec *v)
+{
+    // crunch the vector to just fit the array
+    // useful when the vector is sure to not grow
+    // and this saves memory as well(though the chances of fragmentation increases)
+    // i hope stdlib will move the array somewhere else to reduce fragmentation otherwise this will be useless to do
+    v->buf = realloc(v->buf, v->count * v->elen);
+    if (v->buf == NULL)
+        return false;
+    v->cap = v->count;
+    return true;
+}
+
 void vec_destroy(vec *v)
 {
     free(v->buf);
