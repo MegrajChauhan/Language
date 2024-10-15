@@ -30,6 +30,10 @@ bool parser_check_token(parser *p, token *t, uint64_t exp)
     size_t len = t->value._e - t->value._s;
     if (t->kind != exp)
     {
+        error_unexp_tok err;
+        err.exp = exp;
+        err.got = t->value;
+        error_add(p->err, &err, p->lex->context, UNEXPECTED_TOKEN, t->line, t->line, t->offset, t->offset + len, t->col, t->col + len);
         return false;
     }
     return true;
@@ -56,6 +60,7 @@ bool parse_add_expression(parser *p, expression *expr, uint64_t until)
         if (tok.kind == eof)
         {
             // this is fatal
+            return parser_check_token(p, &tok, until);
         }
         /// NOTE: We are not checking of the token is valid for an expression here.
         /// That extra check can be done with the expression evaluator which eases things
@@ -88,7 +93,12 @@ bool parser_gen_type(parser *p, type *t)
         if (!lexer_peek_token(p->lex, &tok))
             return false;
         if (tok.kind == ASSIGN)
-            break;                      // we are done
+            break; // we are done
+        if (tok.kind == eof)
+        {
+            error_add(p->err, NULL, p->lex->context, UNEXPECTED_EOF, tok.line, tok.line, tok.offset, tok.offset + 1, tok.col, tok.col + 1);
+            return false;
+        }
         lexer_next_token(p->lex, &tok); // should not fail
         switch (tok.kind)
         {
@@ -143,17 +153,32 @@ bool parser_gen_type(parser *p, type *t)
             {
             case CLOSE_BIGBRAC:
                 // nothing, so we need to figure out the length ourselves
-                p->_stat = true;
-                p->f1 = true;
                 break;
             default:
                 // by default, this becomes an expression
                 if (!parse_add_expression(p, &curr->expr, CLOSE_BIGBRAC))
                     return false;
+                // Array length evaluation is not compulsory to be known at
+                // compile-time
             }
+            break;
         }
         default:
+            // fatal error
+            error_unexp_tok err;
+            err.exp = eof;
+            err.got = tok.value;
+            size_t len = tok.value._e - tok.value._s;
+            error_add(p->err, &err, p->lex->context, UNEXPECTED_TOKEN_ARR, tok.line, tok.line, tok.offset, tok.offset + len, tok.col, tok.col + len);
+            return false;
         }
+        curr->next = (type *)malloc(sizeof(type));
+        if (!curr->next)
+        {
+            internal_err();
+            return false;
+        }
+        curr = curr->next;
     }
     // to validate if the given type makes sense or not will be a daunting task
     // we leave this for a later step to perform
@@ -162,11 +187,10 @@ bool parser_gen_type(parser *p, type *t)
     return true;
 }
 
-bool parse_var_declr(parser *p, bool _const)
+bool parse_var_declr(parser *p, bool _const, token *old_tok)
 {
     token name, temp;
-    bool _t = true;
-    type *t;
+    type *t = NULL;
     if (!lexer_next_token(p->lex, &name))
         return false;
     if (!parser_check_token(p, &name, IDENTIFIER))
@@ -178,13 +202,37 @@ bool parse_var_declr(parser *p, bool _const)
     {
         // we have been given the types
         lexer_next_token(p->lex, &temp); // consume the colon
+        t = malloc(sizeof(type));
+        if (!t)
+        {
+            internal_err();
+            return false;
+        }
+        if (!parser_gen_type(p, t))
+            return false;
     }
-    else
-        _t = false;
+    // GET THE EXPRESSION NOW
     // the type deduction will be complicated but we need to do that at later steps
     node *n = (node *)malloc(sizeof(node));
+    node_var_declr *vd = (node_var_declr *)malloc(sizeof(node_var_declr));
     if (!n)
+    {
+        internal_err();
         return false;
+    }
+    if (!vd)
+    {
+        free(n);
+        internal_err();
+        return false;
+    }
+    n->_node = (void *)vd;
+    n->kind = VAR_DECLR;
+    n->l_st = old_tok->line;
+    n->c_st = old_tok->col;
+    n->o_st = old_tok->offset;
+    vd->_t = t;
+    vd->name = name.value;
     return true;
 }
 

@@ -33,7 +33,7 @@ bool parse(parser *p);
 
 bool parse_add_expression(parser *p, expression *expr, uint64_t until);
 
-bool parse_var_declr(parser *p, bool _const);
+bool parse_var_declr(parser *p, bool _const, token *old_tok);
 
 bool parser_gen_type(parser *p, type *t);
 

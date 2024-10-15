@@ -11,7 +11,6 @@
 enum
 {
     VAR_DECLR,
-    ARR_DECLR,
 };
 
 typedef struct type type;
@@ -20,7 +19,6 @@ typedef struct expression_nodes expression_nodes;
 typedef struct expression expression;
 
 typedef struct node_var_declr node_var_declr;
-
 
 struct node
 {
@@ -52,6 +50,7 @@ struct type
     type *next;
     expression expr;
 };
+
 struct node_var_declr
 {
     slice name;

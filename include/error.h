@@ -20,6 +20,8 @@ enum
     DOUBLE_DOTS_FLOAT, // more than one '.' in a floating point number
 
     UNEXPECTED_TOKEN,
+    UNEXPECTED_TOKEN_ARR,
+    UNEXPECTED_EOF,
 };
 
 typedef struct error error;
