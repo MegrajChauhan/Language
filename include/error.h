@@ -22,6 +22,9 @@ enum
     UNEXPECTED_TOKEN,
     UNEXPECTED_TOKEN_TYPE, // expected type
     UNEXPECTED_EOF,
+    UNEXPECTED_EOL, // unexpected end of line(primarily for strings)
+
+    INVALID_STRING,
 };
 
 typedef struct error error;
@@ -41,7 +44,7 @@ struct error_entry
     size_t offset_ed;
     size_t col_st;
     size_t col_ed;
-    
+
     void *err;
 };
 
@@ -64,11 +67,17 @@ void error_evaluate(error *e);
 
 void error_destroy(error *e);
 
+void multi_line_err(error_entry *e);
+
+void err_line_print(error_entry *e);
+
 void __cannot_built_token(error_entry *e);
 
 void __double_dots_float(error_entry *e);
 
 void __unexpected_token(error_entry *e, char *exp);
+
+void __inval_string(error_entry *e);
 
 size_t get_err_len(uint64_t kind);
 

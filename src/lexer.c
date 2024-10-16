@@ -232,12 +232,100 @@ bool lexer_request_character(lexer *l, token *t)
     if (*l->iter == 0)
     {
         // unexpected EOF
-        t->kind = eof;
+        error_unexp_tok err;
+        err.exp = 0; // we will handle this in the function
+        err.got._s = l->iter - 1;
+        err.got._e = l->iter;
+        error_add(l->err, &err, l->context, UNEXPECTED_EOF, t->line, t->line, t->offset - 1, t->offset, t->col - 1, t->col);
         return false;
     }
+    if (*l->iter == '\n')
+    {
+        error_unexp_tok err;
+        err.exp = 0; // we will handle this in the function
+        err.got._s = l->iter - 1;
+        err.got._e = l->iter;
+        error_add(l->err, &err, l->context, UNEXPECTED_EOL, t->line, t->line, t->offset - 1, t->offset, t->col - 1, t->col);
+        return false;
+    }
+    t->value._s = l->iter;
+    if (*l->iter == '\\')
+    {
+        consume(l);
+        // the next character must be a character for now
+        // the complex escape sequences won't be handled just yet
+        switch (*l->iter)
+        {
+        case 'n':
+        case 't':
+        case 'r':
+        case '\\':
+        case '\"':
+        case '\'':
+            consume(l);
+            break;
+        default:
+            error_add(l->err, NULL, l->context, INVALID_STRING, t->line, t->line, t->offset - 1, t->offset, t->col - 1, t->col);
+            return false;
+        }
+    }
     consume(l);
+    t->value._e = l->iter;
+    if (*l->iter != '\'')
+    {
+        error_add(l->err, NULL, l->context, INVALID_STRING, t->line, t->line, t->offset - 1, l->context->offset, t->col - 1, l->context->col);
+        return false;
+    }
+    t->kind = REQUEST;
+    consume(l); // the single quote
+    return true;
 }
 
 bool lexer_request_string(lexer *l, token *t)
 {
+    t->col = l->context->col;
+    t->line = l->context->line;
+    t->offset = l->context->offset;
+    t->value._s = l->iter;
+    while (*l->iter != '\"')
+    {
+        if (*l->iter == 0)
+        {
+            // unexpected EOF
+            error_unexp_tok err;
+            err.exp = 0; // we will handle this in the function
+            err.got._s = l->iter - 1;
+            err.got._e = l->iter;
+            error_add(l->err, &err, l->context, INVALID_STRING, t->line, l->context->line, t->offset - 1, l->context->offset, t->col - 1, l->context->col);
+            return false;
+        }
+        if (*l->iter == '\\')
+        {
+            consume(l);
+            switch (*l->iter)
+            {
+            case 'n':
+            case 't':
+            case 'r':
+            case '\\':
+            case '\"':
+            case '\'':
+                consume(l);
+                break;
+            default:
+                error_add(l->err, NULL, l->context, INVALID_STRING, t->line, l->context->line, t->offset - 1, l->context->offset, t->col - 1, l->context->col);
+                return false;
+            }
+        }
+        consume(l);
+    }
+    if (*l->iter != '\"')
+    {
+        error_add(l->err, NULL, l->context, INVALID_STRING, t->line, l->context->line, t->offset - 1, l->context->offset, t->col - 1, l->context->col);
+        return false;
+    }
+    t->value._e = l->iter;
+    t->kind = REQUEST;
+    consume(l); // the quote
+    return true;
 }

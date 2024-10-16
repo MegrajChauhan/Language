@@ -39,14 +39,17 @@ void error_add(error *e, void *err, file_context *fcont, uint64_t kind, size_t e
     ent.offset_ed = oe;
     ent.col_st = cs;
     ent.col_ed = ce;
-    size_t len = get_err_len(kind);
-    ent.err = malloc(sizeof(len));
-    if (!ent.err)
+    if (err != NULL)
     {
-        fprintf(stderr, "ERROR_HANDLER_INSANITY\n");
-        exit(EXIT_FAILURE);
+        size_t len = get_err_len(kind);
+        ent.err = malloc(sizeof(len));
+        if (!ent.err)
+        {
+            fprintf(stderr, "ERROR_HANDLER_INSANITY\n");
+            exit(EXIT_FAILURE);
+        }
+        memcpy(ent.err, err, len);
     }
-    memcpy(ent.err, err, len);
     if (!vec_push(e->entries, (void *)(&ent)))
     {
         // error handler getting error itself is unacceptable
@@ -79,6 +82,7 @@ void error_evaluate(error *e)
             fatal = true;
             __unexpected_token(ent, "u8, u16, u32, u64, i8, i16, i32, i64, f32, f64, [] or a user-defined type");
             break;
+        case UNEXPECTED_EOL:
         case UNEXPECTED_EOF:
             fatal = true;
             __unexpected_token(ent, NULL);
@@ -86,6 +90,10 @@ void error_evaluate(error *e)
         case UNEXPECTED_TOKEN:
             fatal = true;
             __unexpected_token(ent, tok_to_str(((error_unexp_tok *)ent->err)->exp));
+            break;
+        case INVALID_STRING:
+            fatal = true;
+            __inval_string(ent);
             break;
         }
     }
@@ -97,6 +105,61 @@ void error_destroy(error *e)
 {
     vec_destroy(e->entries);
     free(e);
+}
+
+void multi_line_err(error_entry *e)
+{
+    size_t num_of_lines = e->err_line_ed - e->err_line_st;
+    char *i = e->error_context->entry.stream + (e->offset_st - e->col_st);
+    for (size_t lno = 0; lno <= (num_of_lines - 1); lno++)
+    {
+        size_t len = 0;
+        while (*i != '\n')
+        {
+            putc(*i, stderr);
+            i++;
+            len++;
+        }
+        putc('\n', stderr);
+        putc('\t', stderr);
+        for (size_t j = 0; j < e->col_st; j++)
+            putc(' ', stderr);
+        for (size_t j = e->col_st; j < len; j++)
+            putc('^', stderr);
+        putc('\n', stderr);
+        putc('\t', stderr);
+        e->col_st = 0;
+        i++;
+    }
+    while (*i != 0 && *i != '\n')
+    {
+        putc(*i, stderr);
+        i++;
+    }
+    putc('\n', stderr);
+    putc('\t', stderr);
+    for (size_t j = e->col_st; j < e->col_ed; j++)
+        putc('^', stderr);
+    putc('\n', stderr);
+}
+
+void err_line_print(error_entry *e)
+{
+    char *i = e->error_context->entry.stream + (e->offset_st - e->col_st);
+    while (*i != '\n')
+    {
+        putc(*i, stderr);
+        i++;
+    }
+    putc('\n', stderr);
+    putc('\t', stderr);
+    for (size_t i = 0; i < e->col_st; i++)
+    {
+        putc(' ', stderr);
+    }
+    for (size_t i = e->col_st; i < e->col_ed; i++)
+        putc('^', stderr);
+    putc('\n', stderr);
 }
 
 void __cannot_built_token(error_entry *e)
@@ -124,52 +187,39 @@ void __double_dots_float(error_entry *e)
 {
     fprintf(stderr, "%s:%lu:%lu: Cannot build a number from this. Multiple '.' in a float is not allowed.\n", e->error_context->entry.fname, e->err_line_st, e->col_st);
     fprintf(stderr, "LINE:\n\t");
-    char *i = e->error_context->entry.stream + (e->offset_st - e->col_st);
-    while (*i != '\n')
-    {
-        putc(*i, stderr);
-        i++;
-    }
-    putc('\n', stderr);
-    putc('\t', stderr);
-    for (size_t i = 0; i < e->col_st; i++)
-    {
-        putc(' ', stderr);
-    }
-    for (size_t i = e->col_st; i < e->col_ed; i++)
-        putc('^', stderr);
-    putc('\n', stderr);
+    err_line_print(e);
 }
 
 void __unexpected_token(error_entry *e, char *exp)
 {
     if (e->kind == UNEXPECTED_EOF)
     {
-        fprintf(stderr, "%s:%lu:%lu: Unexpected EOF when expecting a token.\n", e->error_context->entry.fname, e->err_line_st, e->col_st);
+        fprintf(stderr, "%s:%lu:%lu: Unexpected EOF when expecting a valid token, character or identifier.\n", e->error_context->entry.fname, e->err_line_st, e->col_st);
         return;
     }
     error_unexp_tok *err = (error_unexp_tok *)e->err;
-    fprintf(stderr, "%s:%lu:%lu: Unexpected '", e->error_context->entry.fname, e->err_line_st, e->col_st);
-    for (size_t i = 0; i < (err->got._e - err->got._s); i++)
+    if (e->kind == UNEXPECTED_EOL)
+        fprintf(stderr, "%s:%lu:%lu: This EOL was not expected here.\n", e->error_context->entry.fname, e->err_line_st, e->col_st);
+    else
     {
-        putc(*(err->got._s + i), stderr);
+        fprintf(stderr, "%s:%lu:%lu: Unexpected '", e->error_context->entry.fname, e->err_line_st, e->col_st);
+        for (size_t i = 0; i < (err->got._e - err->got._s); i++)
+        {
+            putc(*(err->got._s + i), stderr);
+        }
+        fprintf(stderr, "' when expected %s:\n", exp);
     }
-    fprintf(stderr, "' when expected %s:\n", exp);
     fprintf(stderr, "LINE:\n\t");
-    char *i = e->error_context->entry.stream + (e->offset_st - e->col_st);
-    while (*i != '\n')
-    {
-        putc(*i, stderr);
-        i++;
-    }
-    putc('\n', stderr);
-    putc('\t', stderr);
-    for (size_t i = 0; i < e->col_st; i++)
-    {
-        putc(' ', stderr);
-    }
-    for (size_t i = e->col_st; i < e->col_ed; i++)
-        putc('^', stderr);
+    err_line_print(e);
     free(err);
-    putc('\n', stderr);
+}
+
+void __inval_string(error_entry *e)
+{
+    fprintf(stderr, "%s:%lu:%lu: Invalid string defined here.\n", e->error_context->entry.fname, e->err_line_st, e->col_st);
+    fprintf(stderr, "LINE:\n\t");
+    if (e->err_line_st != e->err_line_ed)
+        multi_line_err(e);
+    else
+        err_line_print(e);
 }

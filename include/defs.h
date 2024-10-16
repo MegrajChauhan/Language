@@ -131,6 +131,9 @@ enum
     TCONST,
     ARRAY,
     TVOID, // this is for the functions only
+    USER_DEF,
+    CHAR,
+    STRING,
 };
 
 #endif

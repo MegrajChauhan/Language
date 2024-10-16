@@ -50,6 +50,7 @@ bool parse_add_expression(parser *p, expression *expr, uint64_t until)
     }
     while (true)
     {
+        bool str = false;
         if (!lexer_peek_token(p->lex, &tok))
             return false;
         if (tok.kind == until)
@@ -66,7 +67,19 @@ bool parse_add_expression(parser *p, expression *expr, uint64_t until)
         /// That extra check can be done with the expression evaluator which eases things
         if (tok.kind == SINGLE_QUOTE)
         {
-            
+            lexer_next_token(p->lex, &tok);
+            if (!lexer_request_character(p->lex, &tok))
+                return false;
+            tok.kind = CHAR;
+            str = true;
+        }
+        if (tok.kind == QUOTE)
+        {
+            lexer_next_token(p->lex, &tok);
+            if (!lexer_request_string(p->lex, &tok))
+                return false;
+            tok.kind = STRING;
+            str = true;
         }
         expression_nodes n;
         n.type = tok.kind;
@@ -77,7 +90,8 @@ bool parse_add_expression(parser *p, expression *expr, uint64_t until)
             internal_err();
             return false;
         }
-        lexer_next_token(p->lex, &tok);
+        if (!str)
+            lexer_next_token(p->lex, &tok);
     }
     if (!vec_crunch(expr->nodes))
     {
@@ -148,6 +162,9 @@ bool parser_gen_type(parser *p, type *t)
             break;
         case VOID:
             curr->base = VOID;
+            break;
+        case IDENTIFIER:
+            curr->base = USER_DEF;
             break;
         case OPEN_BIGBRAC:
         {
