@@ -124,6 +124,186 @@ bool lexer_next_token(lexer *l, token *t)
             case '.':
                 t->kind = ACCESS_DOT;
                 break;
+            case '+':
+            {
+                switch (*(l->iter + 1))
+                {
+                case '=':
+                    t->kind = PLUS_EQ;
+                    consume(l);
+                    break;
+                case '+':
+                    t->kind = INC;
+                    consume(l);
+                    break;
+                default:
+                    t->kind = PLUS;
+                }
+                break;
+            }
+            case '-':
+            {
+                switch (*(l->iter + 1))
+                {
+                case '=':
+                    t->kind = MINUS_EQ;
+                    consume(l);
+                    break;
+                case '-':
+                    t->kind = DEC;
+                    consume(l);
+                    break;
+                default:
+                    t->kind = MINUS;
+                }
+                break;
+            }
+            case '*':
+            {
+                switch (*(l->iter + 1))
+                {
+                case '=':
+                    t->kind = MUL_EQ;
+                    consume(l);
+                    break;
+                default:
+                    t->kind = MUL;
+                }
+                break;
+            }
+            case '/':
+            {
+                switch (*(l->iter + 1))
+                {
+                case '=':
+                    t->kind = DIV_EQ;
+                    consume(l);
+                    break;
+                default:
+                    t->kind = DIV;
+                }
+                break;
+            }
+            case '%':
+            {
+                switch (*(l->iter + 1))
+                {
+                case '=':
+                    t->kind = MOD_EQ;
+                    consume(l);
+                    break;
+                default:
+                    t->kind = MOD;
+                }
+                break;
+            }
+            case '!':
+            {
+                switch (*(l->iter + 1))
+                {
+                case '=':
+                    t->kind = NOT_EQUALS;
+                    consume(l);
+                    break;
+                default:
+                    t->kind = LNOT;
+                }
+                break;
+            }
+            case '|':
+            {
+                switch (*(l->iter + 1))
+                {
+                case '=':
+                    t->kind = OR_EQ;
+                    consume(l);
+                    break;
+                case '|':
+                    t->kind = LOR;
+                    consume(l);
+                    break;
+                default:
+                    t->kind = OR;
+                }
+                break;
+            }
+            case '&':
+            {
+                switch (*(l->iter + 1))
+                {
+                case '=':
+                    t->kind = AND_EQ;
+                    consume(l);
+                    break;
+                case '|':
+                    t->kind = LAND;
+                    consume(l);
+                    break;
+                default:
+                    t->kind = AND;
+                }
+                break;
+            }
+            case '~':
+            {
+                switch (*(l->iter + 1))
+                {
+                case '=':
+                    t->kind = NOT_EQ;
+                    consume(l);
+                    break;
+                default:
+                    t->kind = NOT;
+                }
+                break;
+            }
+            case '^':
+            {
+                switch (*(l->iter + 1))
+                {
+                case '=':
+                    t->kind = XOR_EQ;
+                    consume(l);
+                    break;
+                default:
+                    t->kind = XOR;
+                }
+                break;
+            }
+            case '>':
+            {
+                switch (*(l->iter + 1))
+                {
+                case '=':
+                    t->kind = GREATER_EQ;
+                    consume(l);
+                    break;
+                case '>':
+                    t->kind = RSHIFT;
+                    consume(l);
+                    break;
+                default:
+                    t->kind = GREATER_THAN;
+                }
+                break;
+            }
+            case '<':
+            {
+                switch (*(l->iter + 1))
+                {
+                case '=':
+                    t->kind = LESS_EQ;
+                    consume(l);
+                    break;
+                case '>':
+                    t->kind = LSHIFT;
+                    consume(l);
+                    break;
+                default:
+                    t->kind = LESS_THAN;
+                }
+                break;
+            }
             default:
             {
                 // error

@@ -95,14 +95,45 @@ enum
     QUOTE,
     SINGLE_QUOTE, // we need to fit this somewhere
     ACCESS_DOT,
+    PLUS,
+    MINUS,
+    MUL,
+    DIV,
+    MOD,
+    LNOT,
+    OR,
+    AND,
+    NOT,
+    XOR,
+    GREATER_THAN,
+    LESS_THAN,
 
     /* multi-character operators */
 
     // grammer required operators
     // Assignment operators
-    EQUALS,
+    PLUS_EQ,
+    MINUS_EQ,
+    MUL_EQ,
+    DIV_EQ,
+    MOD_EQ,
+    OR_EQ,
+    AND_EQ,
+    NOT_EQ,
+    XOR_EQ,
+
     // demand operators
     // absolutely necessary
+    EQUALS,
+    NOT_EQUALS,
+    LOR,
+    LAND,
+    INC,
+    DEC,
+    LSHIFT,
+    RSHIFT,
+    GREATER_EQ,
+    LESS_EQ,
 
     /* OTHER TOKEN TYPES */
     NUM_INT,

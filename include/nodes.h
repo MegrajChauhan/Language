@@ -13,6 +13,14 @@ enum
     VAR_DECLR,
 };
 
+enum
+{
+    ARR_LENGTH,
+    ARR_ASSIGNMENT,
+    NORMAL_EXPR,
+    STRING_ASSIGN,
+};
+
 typedef struct type type;
 typedef struct node node;
 typedef struct expression_nodes expression_nodes;

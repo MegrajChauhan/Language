@@ -1,1 +1,37 @@
 1. In a variable definition statement, everything after '=' to ';' is an expression.
+
+OPERS:
++
+-
+*
+/
+%
+
+! -> Logical NOT
+&
+~ -> Bitwise NOT
+^ -> XOR
+>>
+<<
+
+=
+==
+!=
+|
+||
+&&
+++
+--
++=
+-=
+*=
+/=
+%=
+<
+>
+>=
+<=
+|=
+&=
+~=
+^=
