@@ -20,7 +20,7 @@ enum
     DOUBLE_DOTS_FLOAT, // more than one '.' in a floating point number
 
     UNEXPECTED_TOKEN,
-    UNEXPECTED_TOKEN_ARR,
+    UNEXPECTED_TOKEN_TYPE, // expected type
     UNEXPECTED_EOF,
 };
 
@@ -68,6 +68,6 @@ void __cannot_built_token(error_entry *e);
 
 void __double_dots_float(error_entry *e);
 
-// void __unexpected_token(file_context *fcont, size_t els, size_t ele, size_t os, size_t oe, size_t cs, size_t ce, char *exp);
+void __unexpected_token(error_entry *e, char *exp);
 
 #endif

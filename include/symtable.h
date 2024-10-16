@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "defs.h"
 #include "umap.h"
+#include "nodes.h"
 
 typedef struct symtable_entry symtable_entry;
 typedef struct symtable symtable;
@@ -30,7 +31,7 @@ struct symtable_entry
 
         struct
         {
-            void *value;
+            void *ptr;
         };
     };
     bool _const; // is the entry a constant

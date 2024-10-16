@@ -21,7 +21,7 @@ struct parser
 
     // status flags
     bool _stat;
-    bool err;
+    bool error;
     bool f1, f2, f3; // any interpretation based on context
 };
 

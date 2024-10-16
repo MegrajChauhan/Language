@@ -72,3 +72,80 @@ bool get_filename_from_path(slice *path)
     path->_s = (*tmp == SEPARATOR) ? ++tmp : tmp;
     return true;
 }
+
+char *tok_to_str(uint64_t tok)
+{
+    switch (tok)
+    {
+    case U8:
+        return "u8";
+    case U16:
+        return "u16";
+    case U32:
+        return "u32";
+    case U64:
+        return "u64";
+    case I8:
+        return "i8";
+    case I16:
+        return "i16";
+    case I32:
+        return "i32";
+    case I64:
+        return "i64";
+    case F32:
+        return "f32";
+    case F64:
+        return "f64";
+    case VOID:
+        return "void";
+    case BOOL:
+        return "bool";
+    case TRUE:
+        return "true";
+    case FALSE:
+        return "false";
+    case IF:
+        return "if";
+    case ELSE:
+        return "else";
+    case VAR:
+        return "var";
+    case CONST:
+        return "const";
+    case GLOBAL:
+        return "global";
+    case FN:
+        return "fn";
+    case ENUM:
+        return "enum";
+    case STRUCT:
+        return "struct";
+    case COLON:
+        return ":";
+    case SEMI_COLON:
+        return ";";
+    case ASSIGN:
+        return "=";
+    case OPEN_PAREN:
+        return "(";
+    case CLOSE_PAREN:
+        return ")";
+    case OPEN_CURLY:
+        return "{";
+    case CLOSE_CURLY:
+        return "}";
+    case OPEN_BIGBRAC:
+        return "[";
+    case CLOSE_BIGBRAC:
+        return "]";
+    case QUOTE:
+        return "\"";
+    case SINGLE_QUOTE:
+        return "'";
+    case ACCESS_DOT:
+        return ".";
+    case EQUALS:
+        return "==";
+    }
+}

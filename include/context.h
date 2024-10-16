@@ -8,6 +8,7 @@
 #include "file_context.h"
 #include "lexer.h"
 #include "namespace.h"
+#include "parser.h"
 
 typedef struct context context;
 

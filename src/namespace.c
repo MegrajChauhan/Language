@@ -38,3 +38,8 @@ void namespace_destroy(namespace *ns)
     vec_destroy(ns->nodes); // each node pointer is freed by the parser
     free(ns);
 }
+
+bool namespace_add_node(namespace *ns, node *node)
+{
+    return vec_push(ns->nodes, node);
+}

@@ -14,7 +14,7 @@ parser *parser_init(file_context *fc, error *e, namespace *ns)
     p->ns = ns;
     p->ns->_global = false; // the main namespace(a child can be global though)
     p->_stat = false;
-    p->err = false;
+    p->error = false;
     return p;
 }
 
@@ -33,7 +33,7 @@ bool parser_check_token(parser *p, token *t, uint64_t exp)
         error_unexp_tok err;
         err.exp = exp;
         err.got = t->value;
-        error_add(p->err, &err, p->lex->context, UNEXPECTED_TOKEN, t->line, t->line, t->offset, t->offset + len, t->col, t->col + len);
+        error_add(p->err, &err, p->lex->context, t->kind == eof ? UNEXPECTED_EOF : UNEXPECTED_TOKEN, t->line, t->line, t->offset, t->offset + len, t->col, t->col + len);
         return false;
     }
     return true;
@@ -88,12 +88,19 @@ bool parser_gen_type(parser *p, type *t)
     // 't' will be allocated
     token tok;
     type *curr = t;
+    if (!lexer_peek_token(p->lex, &tok))
+        return false;
+    if (tok.kind == ASSIGN)
+    {
+        error_unexp_tok err;
+        err.exp = eof;
+        err.got = tok.value;
+        size_t len = tok.value._e - tok.value._s;
+        error_add(p->err, &err, p->lex->context, UNEXPECTED_TOKEN_TYPE, tok.line, tok.line, tok.offset, tok.offset + len, tok.col, tok.col + len);
+        return false;
+    }
     while (true)
     {
-        if (!lexer_peek_token(p->lex, &tok))
-            return false;
-        if (tok.kind == ASSIGN)
-            break; // we are done
         if (tok.kind == eof)
         {
             error_add(p->err, NULL, p->lex->context, UNEXPECTED_EOF, tok.line, tok.line, tok.offset, tok.offset + 1, tok.col, tok.col + 1);
@@ -169,9 +176,13 @@ bool parser_gen_type(parser *p, type *t)
             err.exp = eof;
             err.got = tok.value;
             size_t len = tok.value._e - tok.value._s;
-            error_add(p->err, &err, p->lex->context, UNEXPECTED_TOKEN_ARR, tok.line, tok.line, tok.offset, tok.offset + len, tok.col, tok.col + len);
+            error_add(p->err, &err, p->lex->context, UNEXPECTED_TOKEN_TYPE, tok.line, tok.line, tok.offset, tok.offset + len, tok.col, tok.col + len);
             return false;
         }
+        if (!lexer_peek_token(p->lex, &tok))
+            return false;
+        if (tok.kind == ASSIGN)
+            break;
         curr->next = (type *)malloc(sizeof(type));
         if (!curr->next)
         {
@@ -210,8 +221,12 @@ bool parse_var_declr(parser *p, bool _const, token *old_tok)
         }
         if (!parser_gen_type(p, t))
             return false;
+        if (!lexer_peek_token(p->lex, &temp))
+            return false;
     }
-    // GET THE EXPRESSION NOW
+    if (!parser_check_token(p, &temp, ASSIGN))
+        return false;
+    lexer_next_token(p->lex, &temp); // won't fail
     // the type deduction will be complicated but we need to do that at later steps
     node *n = (node *)malloc(sizeof(node));
     node_var_declr *vd = (node_var_declr *)malloc(sizeof(node_var_declr));
@@ -226,13 +241,32 @@ bool parse_var_declr(parser *p, bool _const, token *old_tok)
         internal_err();
         return false;
     }
+    if (!parse_add_expression(p, &vd->expr, SEMI_COLON))
+    {
+        free(vd);
+        free(n);
+        return false;
+    }
+    if (_const)
+        vd->expr.must_eval = true;
+    lexer_next_token(p->lex, &temp); // shouldn't fail
     n->_node = (void *)vd;
     n->kind = VAR_DECLR;
     n->l_st = old_tok->line;
     n->c_st = old_tok->col;
     n->o_st = old_tok->offset;
+    n->l_ed = temp.line;
+    n->c_ed = temp.col;
+    n->o_ed = temp.offset;
     vd->_t = t;
     vd->name = name.value;
+    if (!namespace_add_node(p->ns, n))
+    {
+        internal_err();
+        free(n);
+        free(vd);
+        return false;
+    }
     return true;
 }
 
@@ -246,6 +280,14 @@ bool parse(parser *p)
         switch (t.kind)
         {
         case VAR:
+            if (!parse_var_declr(p, false, &t))
+                return false;
+            break;
+        case CONST:
+            if (!parse_var_declr(p, true, &t))
+                return false;
+            break;
         }
     }
+    return true;
 }

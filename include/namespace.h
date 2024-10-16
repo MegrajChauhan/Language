@@ -29,4 +29,6 @@ namespace *namespace_init(namespace *parent);
 
 void namespace_destroy(namespace *ns);
 
+bool namespace_add_node(namespace *ns, node *node);
+
 #endif

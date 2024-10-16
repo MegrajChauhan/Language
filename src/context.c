@@ -75,17 +75,14 @@ bool context_make_first_pass(context *c)
 
 bool context_parse_file_tree(context *c)
 {
-    lexer *l = lexer_init(c->fcont, c->errors);
-    if (!l)
-        return false;
-    token t;
-    while (true)
+    parser *p = parser_init(c->fcont, c->errors, c->ns);
+    if (!p)
     {
-        bool res = lexer_next_token(l, &t);
-        if (t.kind == eof)
-            break;
+        internal_err();
+        return false;
     }
-    error_evaluate(c->errors);
-    destroy_lexer(l);
+    if (!parse(p))
+        error_evaluate(c->errors);
+    parser_destroy(p);
     return true;
 }
