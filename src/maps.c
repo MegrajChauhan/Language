@@ -14,7 +14,7 @@ bool gen_map()
     // we will manually enter every single entry now
     // in case the language gets big someday with many keywords
     // and operators then this will be a serious bottleneck
-    char *keys[24] =
+    char *keys[] =
         {
             "u8",
             "u16",
@@ -45,10 +45,11 @@ bool gen_map()
             "enum",
             "struct",
         };
-    char *opers[14] =
+    char *opers[] =
         {
             ":",
             ";",
+            ",",
             "=",
 
             "#",
@@ -72,7 +73,7 @@ bool gen_map()
         if (!umap_insert(key_map, keys[i], i))
             return false;
     }
-    for (size_t j = 0; j < 14; j++, i++)
+    for (size_t j = 0; j < 16; j++, i++)
     {
         if (!umap_insert(oper_map, opers[j], i))
             return false;

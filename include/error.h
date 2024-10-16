@@ -41,7 +41,7 @@ struct error_entry
     size_t offset_ed;
     size_t col_st;
     size_t col_ed;
-
+    
     void *err;
 };
 
@@ -69,5 +69,7 @@ void __cannot_built_token(error_entry *e);
 void __double_dots_float(error_entry *e);
 
 void __unexpected_token(error_entry *e, char *exp);
+
+size_t get_err_len(uint64_t kind);
 
 #endif

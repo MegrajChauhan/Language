@@ -78,6 +78,9 @@ bool lexer_next_token(lexer *l, token *t)
             case ':':
                 t->kind = COLON;
                 break;
+            case ',':
+                t->kind = COMMA;
+                break;
             case ';':
                 t->kind = SEMI_COLON;
                 break;
@@ -216,4 +219,25 @@ bool group_characters(lexer *l, token *t)
     t->line = l->context->line;
     t->offset = o_st;
     return true;
+}
+
+bool lexer_request_character(lexer *l, token *t)
+{
+    // read just one character and return
+    // if there is an ending quote is none of lexer's business
+    // if there are escape sequences, we will handle them but not all of them just yet
+    t->col = l->context->col;
+    t->line = l->context->line;
+    t->offset = l->context->offset;
+    if (*l->iter == 0)
+    {
+        // unexpected EOF
+        t->kind = eof;
+        return false;
+    }
+    consume(l);
+}
+
+bool lexer_request_string(lexer *l, token *t)
+{
 }

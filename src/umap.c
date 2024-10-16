@@ -86,9 +86,12 @@ umap_entry *umap_find(umap *map, slice *s)
     memcpy(key, s->_s, len);
     size_t index = hash_string(key, map->bucket_count);
     // Check if the bucket is in use
-    if (map->buckets[index].key != NULL && strcmp(map->buckets[index].key, key) == 0)
+    umap_entry *e = &map->buckets[index];
+    while (e != NULL)
     {
-        return &map->buckets[index]; // Found the entry
+        if (e->key != NULL && strcmp(e->key, key) == 0)
+            return &map->buckets[index]; // Found the entry
+        e = e->next;
     }
     return NULL; // Not found
 }

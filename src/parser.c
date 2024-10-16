@@ -64,6 +64,10 @@ bool parse_add_expression(parser *p, expression *expr, uint64_t until)
         }
         /// NOTE: We are not checking of the token is valid for an expression here.
         /// That extra check can be done with the expression evaluator which eases things
+        if (tok.kind == SINGLE_QUOTE)
+        {
+            
+        }
         expression_nodes n;
         n.type = tok.kind;
         n.val._s = tok.value._s;
@@ -160,6 +164,7 @@ bool parser_gen_type(parser *p, type *t)
             {
             case CLOSE_BIGBRAC:
                 // nothing, so we need to figure out the length ourselves
+                lexer_next_token(p->lex, &_t);
                 break;
             default:
                 // by default, this becomes an expression
@@ -249,7 +254,6 @@ bool parse_var_declr(parser *p, bool _const, token *old_tok)
     }
     if (_const)
         vd->expr.must_eval = true;
-    lexer_next_token(p->lex, &temp); // shouldn't fail
     n->_node = (void *)vd;
     n->kind = VAR_DECLR;
     n->l_st = old_tok->line;

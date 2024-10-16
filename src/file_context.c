@@ -22,7 +22,7 @@ bool init_file_context_slice(file_context *fc, slice *s)
     fc->entry.fname = strndup(s->_s, s->_e - s->_s + 1);
     if (!fc->entry.fname)
         return false;
-    fc->line = 0;
+    fc->line = 1;
     fc->offset = 0;
     fc->parent = NULL; // set manually
     fc->children_count = 0;

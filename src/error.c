@@ -14,6 +14,18 @@ error *error_init()
     return e;
 }
 
+size_t get_err_len(uint64_t kind)
+{
+    switch (kind)
+    {
+    case UNEXPECTED_EOF:
+    case UNEXPECTED_TOKEN:
+    case UNEXPECTED_TOKEN_TYPE:
+        return sizeof(error_unexp_tok);
+    }
+    return 0;
+}
+
 void error_add(error *e, void *err, file_context *fcont, uint64_t kind, size_t els, size_t ele, size_t os, size_t oe, size_t cs, size_t ce)
 {
     Assert(e != NULL);
@@ -27,7 +39,14 @@ void error_add(error *e, void *err, file_context *fcont, uint64_t kind, size_t e
     ent.offset_ed = oe;
     ent.col_st = cs;
     ent.col_ed = ce;
-    ent.err = err;
+    size_t len = get_err_len(kind);
+    ent.err = malloc(sizeof(len));
+    if (!ent.err)
+    {
+        fprintf(stderr, "ERROR_HANDLER_INSANITY\n");
+        exit(EXIT_FAILURE);
+    }
+    memcpy(ent.err, err, len);
     if (!vec_push(e->entries, (void *)(&ent)))
     {
         // error handler getting error itself is unacceptable
@@ -151,5 +170,6 @@ void __unexpected_token(error_entry *e, char *exp)
     }
     for (size_t i = e->col_st; i < e->col_ed; i++)
         putc('^', stderr);
+    free(err);
     putc('\n', stderr);
 }

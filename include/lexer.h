@@ -40,6 +40,10 @@ bool lexer_peek_token(lexer *l, token *t);
 
 void destroy_lexer(lexer *l);
 
+bool lexer_request_character(lexer *l, token *t);
+
+bool lexer_request_string(lexer *l, token *t);
+
 /* UTILITIES */
 char peek(lexer *l);
 

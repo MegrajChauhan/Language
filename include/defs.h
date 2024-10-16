@@ -76,6 +76,7 @@ enum
     // grammer required operators
     COLON,
     SEMI_COLON,
+    COMMA,
 
     // Assignment operators
     ASSIGN,
