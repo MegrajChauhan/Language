@@ -35,3 +35,10 @@ OPERS:
 &=
 ~=
 ^=
+
+struct X
+{
+    ....
+}
+
+var a: X = X();

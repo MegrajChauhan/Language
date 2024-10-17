@@ -34,3 +34,32 @@ void symtable_destroy(symtable *table)
     umap_destroy(table->entries);
     free(table);
 }
+
+bool symtable_find(symtable *table, slice name)
+{
+    return umap_find(table->entries, &name) != NULL;
+}
+
+symtable_entry *symtable_get(symtable *table, slice name)
+{
+    return (symtable_entry *)umap_find(table->entries, &name);
+}
+
+bool symtable_add(symtable *table, symtable_entry *entry, slice name)
+{
+    // we won't check if an entry already exists
+    // this is because we confirm that first before we even add
+    symtable_entry *ent = (symtable_entry *)malloc(sizeof(symtable_entry));
+    if (!ent)
+    {
+        internal_err();
+        return false;
+    }
+    memcpy(ent, entry, sizeof(symtable_entry));
+    if (!umap_insert_slice(table->entries, &name, ent))
+    {
+        internal_err();
+        return false;
+    }
+    return true;
+}

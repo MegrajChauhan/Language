@@ -25,11 +25,14 @@ enum
     UNEXPECTED_EOL, // unexpected end of line(primarily for strings)
 
     INVALID_STRING,
+
+    REDECLARATION,
 };
 
 typedef struct error error;
 typedef struct error_entry error_entry;
 typedef struct error_unexp_tok error_unexp_tok;
+typedef struct error_redeclr error_redeclr;
 
 struct error_entry
 {
@@ -52,6 +55,12 @@ struct error_unexp_tok
 {
     slice got;
     uint64_t exp; // we need to get a "TYPE to STR" thing now
+};
+
+struct error_redeclr
+{
+    node *redec;
+    node *original;
 };
 
 struct error

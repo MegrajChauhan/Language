@@ -187,6 +187,7 @@ bool parser_gen_type(parser *p, type *t)
                 // by default, this becomes an expression
                 if (!parse_add_expression(p, &curr->expr, CLOSE_BIGBRAC))
                     return false;
+                curr->expr._type = ARR_LENGTH;
                 // Array length evaluation is not compulsory to be known at
                 // compile-time
             }
@@ -269,6 +270,7 @@ bool parse_var_declr(parser *p, bool _const, token *old_tok)
         free(n);
         return false;
     }
+    vd->expr._type = ASSIGN;
     if (_const)
         vd->expr.must_eval = true;
     n->_node = (void *)vd;

@@ -28,6 +28,8 @@ umap *umap_init(size_t bucket_count);
 
 bool umap_insert(umap *map, char *key, uint64_t value);
 
+bool umap_insert_slice(umap *map, slice *s, uint64_t value);
+
 umap_entry *umap_find(umap *map, slice *s);
 
 void umap_destroy(umap *map);

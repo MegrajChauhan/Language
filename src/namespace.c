@@ -28,7 +28,6 @@ namespace *namespace_init(namespace *parent)
         return NULL;
     }
     ns->_global = false;
-    ns->name._e = NULL; // indicating unnamed namespace i.e a scope
     return ns;
 }
 
@@ -42,4 +41,18 @@ void namespace_destroy(namespace *ns)
 bool namespace_add_node(namespace *ns, node *node)
 {
     return vec_push(ns->nodes, node);
+}
+
+symtable_entry *namespace_query_symtable(namespace *ns, slice name)
+{
+    namespace *curr = ns;
+    symtable_entry *res = NULL;
+    while (curr != NULL)
+    {
+        if ((res = symtable_get(ns->table, name)) == NULL)
+            curr = curr->parent;
+        else
+            break;
+    }
+    return res;
 }

@@ -25,7 +25,7 @@ ast *ast_init()
 
 bool expr_to_ast(ast *tree, expression *expr, error *e)
 {
-    
+    // build the AST using associativity and precedence
 }
 
 void ast_destroy(ast *tree)

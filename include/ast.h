@@ -22,10 +22,20 @@ struct ast
     ast_node nodes;
 };
 
+// size_t get_precedence(uint64_t kind);
+
+// size_t 
+
 ast *ast_init();
 
 bool expr_to_ast(ast *tree, expression *expr, error *e);
 
 void ast_destroy(ast *tree);
+
+/*
+
+(), [], 
+
+*/
 
 #endif

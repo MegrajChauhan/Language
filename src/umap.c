@@ -77,6 +77,15 @@ bool umap_insert(umap *map, char *key, uint64_t value)
     return true;
 }
 
+bool umap_insert_slice(umap *map, slice *s, uint64_t value)
+{
+    size_t len = (s->_e - s->_s);
+    char key[len + 1];
+    memcpy(key, s->_s, len);
+    key[len] = 0;
+    return umap_insert(map, key, value);
+}
+
 // Find an entry by key
 umap_entry *umap_find(umap *map, slice *s)
 {
