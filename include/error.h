@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include "defs.h"
 #include "vec.h"
+#include "symtable.h"
 
 #ifndef NONO
 #define Assert(cond) ((cond) ? 0 : fprintf(stderr, "Assertion '%s' failed.\nFILE: %s\nLINE: %lu\n", #cond, __FILE__, __LINE__))
@@ -27,12 +28,14 @@ enum
     INVALID_STRING,
 
     REDECLARATION,
+    INVALID_TYPE_EXPR,
 };
 
 typedef struct error error;
 typedef struct error_entry error_entry;
 typedef struct error_unexp_tok error_unexp_tok;
 typedef struct error_redeclr error_redeclr;
+typedef struct error_inval_type_expr error_inval_type_expr;
 
 struct error_entry
 {
@@ -60,7 +63,13 @@ struct error_unexp_tok
 struct error_redeclr
 {
     node *redec;
-    node *original;
+    symtable_entry *original;
+};
+
+struct error_inval_type_expr
+{
+    type *_the_node_;
+    type *st;
 };
 
 struct error
@@ -71,6 +80,8 @@ struct error
 error *error_init();
 
 void error_add(error *e, void *err, file_context *fcont, uint64_t kind, size_t els, size_t ele, size_t os, size_t oe, size_t cs, size_t ce);
+
+void error_add_complex(error *e, void *err, file_context *cont, uint64_t kind);
 
 void error_evaluate(error *e);
 
@@ -89,5 +100,7 @@ void __unexpected_token(error_entry *e, char *exp);
 void __inval_string(error_entry *e);
 
 size_t get_err_len(uint64_t kind);
+
+void __invalid_type_expr(error_entry *e);
 
 #endif

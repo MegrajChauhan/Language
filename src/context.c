@@ -54,6 +54,7 @@ context *create_context(char *input_fname)
         free(c);
         return NULL;
     }
+    c->ns->cont = c->fcont;
     return c;
 }
 
@@ -82,6 +83,8 @@ bool context_parse_file_tree(context *c)
         return false;
     }
     if (!parse(p))
+        error_evaluate(c->errors);
+    if (!analyse(c->ns, c->errors))
         error_evaluate(c->errors);
     parser_destroy(p);
     return true;

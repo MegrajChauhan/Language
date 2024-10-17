@@ -42,3 +42,19 @@ struct X
 }
 
 var a: X = X();
+
+TYPE RULES:
+
+PRIMITIVE TYPES:
+uX, iX, fX
+
+DATA STRUCTURES:
+uX[LEN], iX[LEN], fX[LEN], 
+  In general:
+     (type) [LEN] -> Array
+
+POINTERS:
+X const *, X *
+ In general:
+   (type) (qualifier) *
+ EG: u8[12] * => Pointer to an array of bytes of length 12

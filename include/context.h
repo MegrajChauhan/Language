@@ -9,6 +9,7 @@
 #include "lexer.h"
 #include "namespace.h"
 #include "parser.h"
+#include "analyse.h"
 
 typedef struct context context;
 

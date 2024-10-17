@@ -13,4 +13,6 @@ bool analyse(namespace *ns, error *e);
 
 bool variable_declaration(namespace *ns, node *n, error *e);
 
+bool analyse_type(namespace *ns, type *t, error *e);
+
 #endif

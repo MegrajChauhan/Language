@@ -49,8 +49,12 @@ symtable_entry *namespace_query_symtable(namespace *ns, slice name)
     symtable_entry *res = NULL;
     while (curr != NULL)
     {
-        if ((res = symtable_get(ns->table, name)) == NULL)
+        if ((res = symtable_get(curr->table, name)) == NULL)
+        {
+            if (curr->cont != curr->parent->cont && !curr->parent->_global)
+                break;
             curr = curr->parent;
+        }
         else
             break;
     }

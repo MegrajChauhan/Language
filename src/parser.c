@@ -161,7 +161,7 @@ bool parser_gen_type(parser *p, type *t)
             curr->base = TCONST;
             break;
         case VOID:
-            curr->base = VOID;
+            curr->base = TVOID;
             break;
         case IDENTIFIER:
             curr->base = USER_DEF;
@@ -182,6 +182,7 @@ bool parser_gen_type(parser *p, type *t)
             case CLOSE_BIGBRAC:
                 // nothing, so we need to figure out the length ourselves
                 lexer_next_token(p->lex, &_t);
+                curr->expr.nodes = NULL;
                 break;
             default:
                 // by default, this becomes an expression
@@ -202,10 +203,16 @@ bool parser_gen_type(parser *p, type *t)
             error_add(p->err, &err, p->lex->context, UNEXPECTED_TOKEN_TYPE, tok.line, tok.line, tok.offset, tok.offset + len, tok.col, tok.col + len);
             return false;
         }
+        curr->off = tok.offset;
+        curr->col = tok.col;
+        curr->cole = p->lex->context->col;
         if (!lexer_peek_token(p->lex, &tok))
             return false;
         if (tok.kind == ASSIGN)
+        {
+            curr->next = NULL;
             break;
+        }
         curr->next = (type *)malloc(sizeof(type));
         if (!curr->next)
         {
@@ -218,6 +225,7 @@ bool parser_gen_type(parser *p, type *t)
     // we leave this for a later step to perform
     // we will need extreme checks and analysis on each node so everything makes sense
     // since we need it anyway, we will leave this for later
+
     return true;
 }
 

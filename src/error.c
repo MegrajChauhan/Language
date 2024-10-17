@@ -19,9 +19,14 @@ size_t get_err_len(uint64_t kind)
     switch (kind)
     {
     case UNEXPECTED_EOF:
+    case UNEXPECTED_EOL:
     case UNEXPECTED_TOKEN:
     case UNEXPECTED_TOKEN_TYPE:
         return sizeof(error_unexp_tok);
+    case REDECLARATION:
+        return sizeof(error_redeclr);
+    case INVALID_TYPE_EXPR:
+        return sizeof(error_inval_type_expr);
     }
     return 0;
 }
@@ -42,7 +47,7 @@ void error_add(error *e, void *err, file_context *fcont, uint64_t kind, size_t e
     if (err != NULL)
     {
         size_t len = get_err_len(kind);
-        ent.err = malloc(sizeof(len));
+        ent.err = malloc((len));
         if (!ent.err)
         {
             fprintf(stderr, "ERROR_HANDLER_INSANITY\n");
@@ -57,6 +62,11 @@ void error_add(error *e, void *err, file_context *fcont, uint64_t kind, size_t e
         fprintf(stderr, "ERROR_HANDLER_INSANITY\n");
         exit(EXIT_FAILURE);
     }
+}
+
+void error_add_complex(error *e, void *err, file_context *cont, uint64_t kind)
+{
+    error_add(e, err, cont, kind, 0, 0, 0, 0, 0, 0);
 }
 
 void error_evaluate(error *e)
@@ -94,6 +104,10 @@ void error_evaluate(error *e)
         case INVALID_STRING:
             fatal = true;
             __inval_string(ent);
+            break;
+        case INVALID_TYPE_EXPR:
+            fatal = true;
+            __invalid_type_expr(ent);
             break;
         }
     }
@@ -222,4 +236,24 @@ void __inval_string(error_entry *e)
         multi_line_err(e);
     else
         err_line_print(e);
+}
+
+void __invalid_type_expr(error_entry *e)
+{
+    error_inval_type_expr *err = e->err;
+    fprintf(stderr, "%s:%lu:%lu: Invalid type expression encountered.\n", e->error_context->entry.fname, e->err_line_st, e->col_st);
+    fprintf(stderr, "LINE:\n\t");
+    char *i = e->error_context->entry.stream + (err->st->off - err->st->col);
+    size_t expr_start = err->st->off - err->st->col;
+    size_t node_pos = err->_the_node_->off - err->st->off;
+    size_t node_pos_len = err->_the_node_->cole - err->_the_node_->col;
+    size_t X = 0;
+    
+    while (X != expr_start)
+    {
+        putc(*i, stderr);
+        i++;
+    }
+    putc('\n', stderr);
+    putc('\t', stderr);
 }
