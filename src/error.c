@@ -248,12 +248,45 @@ void __invalid_type_expr(error_entry *e)
     size_t node_pos = err->_the_node_->off - err->st->off;
     size_t node_pos_len = err->_the_node_->cole - err->_the_node_->col;
     size_t X = 0;
-    
+    type *temp = err->_the_node_;
+    while (temp->next != NULL)
+    {
+        temp = temp->next;
+    }
     while (X != expr_start)
     {
         putc(*i, stderr);
         i++;
+        X++;
+    }
+    size_t len = 0;
+    size_t a = 0;
+    // while (*i != '\n' && X !=
+    while (*i != '\n')
+    {
+        putc(*i, stderr);
+        i++;
+        len++;
     }
     putc('\n', stderr);
     putc('\t', stderr);
+    for (; a < len && a < expr_start; a++)
+        putc(' ', stderr);
+    for (; a < len && a < node_pos; a++)
+        putc('~', stderr);
+    while (X != temp->off + (temp->cole - temp->col))
+    {
+        size_t len = 0;
+        while (*i != '\n')
+        {
+            putc(*i, stderr);
+            i++;
+            len++;
+        }
+        for (size_t x = 0; x < len; x++)
+        {
+        }
+        putc('\n', stderr);
+        putc('\t', stderr);
+    }
 }
