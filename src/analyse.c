@@ -4,7 +4,7 @@ bool analyse(namespace *ns, error *e)
 {
     for (size_t i = 0; i < ns->nodes->count; i++)
     {
-        node *n = (node *)vec_at(ns->nodes, i);
+        node *n = ((node *)(*(uint64_t*)vec_at(ns->nodes, i)));
         switch (n->kind)
         {
         case VAR_DECLR:
@@ -36,6 +36,16 @@ bool variable_declaration(namespace *ns, node *n, error *e)
     // It hasn't been declared before.
     // We need to validate the type first
     if (!analyse_type(ns, vd->_t, e))
+        return false;
+
+    // add to the symbol table
+    symtable_entry new_ent;
+    new_ent.kind = _VARIABLE;
+    new_ent.parent = ns->cont;
+    new_ent.ptr = n;
+    new_ent.t = vd->_t;
+    new_ent._const = vd->_const;
+    if (!symtable_add(ns->table, &new_ent, vd->name))
         return false;
     return true;
 }
@@ -85,6 +95,12 @@ bool analyse_type(namespace *ns, type *t, error *e)
         }
         break;
     }
+    default:
+        error_inval_type_expr err;
+        err._the_node_ = curr->next;
+        err.st = t;
+        error_add_complex(e, &err, ns->cont, INVALID_TYPE_EXPR);
+        return false;
     }
     return true;
 }

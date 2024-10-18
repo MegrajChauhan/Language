@@ -103,4 +103,6 @@ size_t get_err_len(uint64_t kind);
 
 void __invalid_type_expr(error_entry *e);
 
+void __redeclration(error_entry *e);
+
 #endif

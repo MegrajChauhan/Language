@@ -25,6 +25,7 @@ struct symtable_entry
     void *ptr;
     bool _const; // is the entry a constant
     uint64_t kind;
+    file_context *parent;
 };
 
 struct symtable

@@ -52,7 +52,7 @@ void *vec_at(vec *v, size_t ind)
     if (ind >= v->count)
         return NULL;
 
-    return (char *)v->buf + (ind * v->elen);
+    return (void*)(((char *)v->buf + (ind * v->elen)));
 }
 
 bool vec_crunch(vec *v)

@@ -65,6 +65,7 @@ struct node_var_declr
     slice name;
     expression expr;
     type *_t;
+    bool _const;
 };
 
 #endif

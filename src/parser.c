@@ -291,6 +291,7 @@ bool parse_var_declr(parser *p, bool _const, token *old_tok)
     n->o_ed = temp.offset;
     vd->_t = t;
     vd->name = name.value;
+    vd->_const = _const;
     if (!namespace_add_node(p->ns, n))
     {
         internal_err();

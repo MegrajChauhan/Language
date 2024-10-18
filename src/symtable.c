@@ -56,7 +56,7 @@ bool symtable_add(symtable *table, symtable_entry *entry, slice name)
         return false;
     }
     memcpy(ent, entry, sizeof(symtable_entry));
-    if (!umap_insert_slice(table->entries, &name, ent))
+    if (!umap_insert_slice(table->entries, &name, (uint64_t)ent))
     {
         internal_err();
         return false;
