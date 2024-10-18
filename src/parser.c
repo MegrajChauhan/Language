@@ -205,7 +205,7 @@ bool parser_gen_type(parser *p, type *t)
         }
         curr->off = tok.offset;
         curr->col = tok.col;
-        curr->cole = p->lex->context->col;
+        curr->offe = p->lex->context->offset;
         if (!lexer_peek_token(p->lex, &tok))
             return false;
         if (tok.kind == ASSIGN)

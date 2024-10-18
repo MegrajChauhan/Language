@@ -57,7 +57,7 @@ struct type
     uint64_t base;
     type *next;
     expression expr;
-    size_t off, col, cole;
+    size_t off, offe, col;
 };
 
 struct node_var_declr

@@ -40,7 +40,7 @@ void namespace_destroy(namespace *ns)
 
 bool namespace_add_node(namespace *ns, node *node)
 {
-    return vec_push(ns->nodes, node);
+    return vec_push(ns->nodes, &node);
 }
 
 symtable_entry *namespace_query_symtable(namespace *ns, slice name)
@@ -51,7 +51,7 @@ symtable_entry *namespace_query_symtable(namespace *ns, slice name)
     {
         if ((res = symtable_get(curr->table, name)) == NULL)
         {
-            if (curr->cont != curr->parent->cont && !curr->parent->_global)
+            if (curr->parent && curr->cont != curr->parent->cont && !curr->parent->_global)
                 break;
             curr = curr->parent;
         }

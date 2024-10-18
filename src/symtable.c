@@ -42,7 +42,8 @@ bool symtable_find(symtable *table, slice name)
 
 symtable_entry *symtable_get(symtable *table, slice name)
 {
-    return (symtable_entry *)umap_find(table->entries, &name);
+    umap_entry *e = umap_find(table->entries, &name);
+    return e? (symtable_entry *)(e->value): NULL;
 }
 
 bool symtable_add(symtable *table, symtable_entry *entry, slice name)

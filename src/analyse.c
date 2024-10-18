@@ -4,7 +4,8 @@ bool analyse(namespace *ns, error *e)
 {
     for (size_t i = 0; i < ns->nodes->count; i++)
     {
-        node *n = ((node *)(*(uint64_t*)vec_at(ns->nodes, i)));
+        void *p = vec_at(ns->nodes, i);
+        node *n = (node *)(*(uint64_t *)p);
         switch (n->kind)
         {
         case VAR_DECLR:
@@ -35,7 +36,7 @@ bool variable_declaration(namespace *ns, node *n, error *e)
     }
     // It hasn't been declared before.
     // We need to validate the type first
-    if (!analyse_type(ns, vd->_t, e))
+    if (!analyse_type(ns, n, vd->_t, e))
         return false;
 
     // add to the symbol table
@@ -50,7 +51,7 @@ bool variable_declaration(namespace *ns, node *n, error *e)
     return true;
 }
 
-bool analyse_type(namespace *ns, type *t, error *e)
+bool analyse_type(namespace *ns, node *n, type *t, error *e)
 {
     type *curr = t;
     switch (curr->base)
@@ -89,6 +90,7 @@ bool analyse_type(namespace *ns, type *t, error *e)
                 error_inval_type_expr err;
                 err._the_node_ = curr->next;
                 err.st = t;
+                err.n = n;
                 error_add_complex(e, &err, ns->cont, INVALID_TYPE_EXPR);
                 return false;
             }
@@ -97,8 +99,9 @@ bool analyse_type(namespace *ns, type *t, error *e)
     }
     default:
         error_inval_type_expr err;
-        err._the_node_ = curr->next;
+        err._the_node_ = curr;
         err.st = t;
+        err.n = n;
         error_add_complex(e, &err, ns->cont, INVALID_TYPE_EXPR);
         return false;
     }

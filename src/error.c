@@ -132,7 +132,7 @@ void multi_line_err(error_entry *e)
     for (size_t lno = 0; lno <= (num_of_lines - 1); lno++)
     {
         size_t len = 0;
-        while (*i != '\n')
+        while (*i != '\n' && *i != 0)
         {
             putc(*i, stderr);
             i++;
@@ -149,7 +149,7 @@ void multi_line_err(error_entry *e)
         e->col_st = 0;
         i++;
     }
-    while (*i != 0 && *i != '\n')
+    while (*i != 0 && *i != '\n' && *i != 0)
     {
         putc(*i, stderr);
         i++;
@@ -164,7 +164,7 @@ void multi_line_err(error_entry *e)
 void err_line_print(error_entry *e)
 {
     char *i = e->error_context->entry.stream + (e->offset_st - e->col_st);
-    while (*i != '\n')
+    while (*i != '\n' && *i != 0)
     {
         putc(*i, stderr);
         i++;
@@ -186,7 +186,7 @@ void __cannot_built_token(error_entry *e)
     fprintf(stderr, "%s:%lu:%lu: Cannot build a token from this. Unexpected '%c'.\n", e->error_context->entry.fname, e->err_line_st, e->col_st, *(e->error_context->entry.stream + e->offset_st));
     fprintf(stderr, "LINE:\n\t");
     char *i = e->error_context->entry.stream + (e->offset_st - e->col_st);
-    while (*i != '\n')
+    while (*i != '\n' && *i != 0)
     {
         putc(*i, stderr);
         i++;
@@ -245,22 +245,22 @@ void __inval_string(error_entry *e)
 void __invalid_type_expr(error_entry *e)
 {
     error_inval_type_expr *err = e->err;
-    fprintf(stderr, "%s:%lu:%lu: Invalid type expression encountered.\n", e->error_context->entry.fname, e->err_line_st, e->col_st);
+    fprintf(stderr, "%s:%lu:%lu: Invalid type expression encountered.\n", e->error_context->entry.fname, err->n->l_st, err->_the_node_->col);
     fprintf(stderr, "LINE:\n\t");
-    char *i = e->error_context->entry.stream + (err->st->off - err->st->col);
-    size_t expr_start = err->st->off - err->st->col;
-    size_t node_pos = err->_the_node_->off - err->st->off;
-    size_t node_pos_len = err->_the_node_->cole - err->_the_node_->col;
+    char *i = e->error_context->entry.stream + err->n->o_st;
+    size_t expr_start = err->st->off - err->n->o_st;
+    size_t node_pos = err->_the_node_->off - err->n->o_st;
+    size_t node_pos_len = err->_the_node_->offe - err->n->o_st;
+    type *t = err->_the_node_;
+    while (t->next != NULL)
+        t = t->next;
+    size_t expr_end = t->offe - err->n->o_st;
+    size_t line_len = err->n->o_ed - err->n->o_st;
     size_t X = 0;
-    type *temp = err->_the_node_;
-    while (temp->next != NULL)
-    {
-        temp = temp->next;
-    }
     while (true)
     {
         size_t len = 0;
-        while (*i != '\n')
+        while (*i != '\n' && *i != 0)
         {
             putc(*i, stderr);
             i++;
@@ -268,48 +268,54 @@ void __invalid_type_expr(error_entry *e)
         }
         putc('\n', stderr);
         putc('\t', stderr);
-        for (size_t a = X; a < (X + len); a++)
+        for (size_t x = 0; x < len; X++, x++)
         {
-            if ((a > expr_start && a < node_pos) || (a > (node_pos + node_pos_len)))
+            if ((X >= expr_start && X < node_pos) || (X >= node_pos_len && X < expr_end))
                 putc('~', stderr);
-            else if (a > node_pos && a < (node_pos + node_pos_len))
+            else if (X >= node_pos && X < node_pos_len)
                 putc('^', stderr);
             else
                 putc(' ', stderr);
         }
+        if (X >= line_len)
+            break;
         putc('\n', stderr);
         putc('\t', stderr);
+        i++;
     }
+    putc('\n', stderr);
 }
 
 void __redeclration(error_entry *e)
 {
     error_redeclr *err = e->err;
-    fprintf(stderr, "%s:%lu:%lu: Redeclaration of variable.\n", e->error_context->entry.fname, e->err_line_st, e->col_st);
+    fprintf(stderr, "%s:%lu:%lu: Redeclaration of variable.\n", e->error_context->entry.fname, err->redec->l_st, err->redec->c_st);
     fprintf(stderr, "LINE:");
     char *i = e->error_context->entry.stream + (err->redec->o_st);
-    for (size_t j = err->redec->l_st; j < err->redec->l_ed; j++)
+    for (size_t j = err->redec->l_st; j <= err->redec->l_ed; j++)
     {
         putc('\n', stderr);
         putc('\t', stderr);
-        while (*i != '\n')
+        while (*i != '\n' && *i != 0)
         {
             putc(*i, stderr);
             i++;
         }
     }
+    putc('\n', stderr);
     node *n = (node *)err->original->ptr;
     fprintf(stderr, "%s:%lu:%lu: Declared here first.\n", err->original->parent->entry.fname, n->l_st, n->c_st);
     fprintf(stderr, "LINE:");
     i = err->original->parent->entry.stream + (n->o_st);
-    for (size_t j = n->l_st; j < n->l_ed; j++)
+    for (size_t j = n->l_st; j <= n->l_ed; j++)
     {
         putc('\n', stderr);
         putc('\t', stderr);
-        while (*i != '\n')
+        while (*i != '\n' && *i != 0)
         {
             putc(*i, stderr);
             i++;
         }
     }
+    putc('\n', stderr);
 }

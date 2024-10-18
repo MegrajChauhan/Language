@@ -70,6 +70,7 @@ struct error_inval_type_expr
 {
     type *_the_node_;
     type *st;
+    node *n;
 };
 
 struct error

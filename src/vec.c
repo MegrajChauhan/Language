@@ -51,7 +51,6 @@ void *vec_at(vec *v, size_t ind)
 {
     if (ind >= v->count)
         return NULL;
-
     return (void*)(((char *)v->buf + (ind * v->elen)));
 }
 
