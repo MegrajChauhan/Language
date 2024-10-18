@@ -15,7 +15,7 @@ typedef struct expr_result expr_result;
 struct expr_result
 {
     type *t;
-    char *val;
+    void *val;
 };
 
 struct expr_evaluator
@@ -26,7 +26,7 @@ struct expr_evaluator
 
     namespace *parent;
     // config
-    type *res_type; // variable's type
+    node *res_type; // variable node
 };
 
 #endif

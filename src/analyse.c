@@ -2,6 +2,7 @@
 
 bool analyse(namespace *ns, error *e)
 {
+    bool ret = true;
     for (size_t i = 0; i < ns->nodes->count; i++)
     {
         void *p = vec_at(ns->nodes, i);
@@ -10,11 +11,11 @@ bool analyse(namespace *ns, error *e)
         {
         case VAR_DECLR:
             if (!variable_declaration(ns, n, e))
-                return false;
+                ret = false;
             break;
         }
     }
-    return true;
+    return ret;
 }
 
 bool variable_declaration(namespace *ns, node *n, error *e)
