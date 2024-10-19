@@ -51,7 +51,7 @@ void *vec_at(vec *v, size_t ind)
 {
     if (ind >= v->count)
         return NULL;
-    return (void*)(((char *)v->buf + (ind * v->elen)));
+    return (void *)(((char *)v->buf + (ind * v->elen)));
 }
 
 bool vec_crunch(vec *v)
@@ -65,6 +65,23 @@ bool vec_crunch(vec *v)
         return false;
     v->cap = v->count;
     return true;
+}
+
+void vec_subvec(vec *v, vec *res, size_t st_ind)
+{
+    // make a sub vector
+    size_t new_count = v->count - st_ind;
+    void *new_buf = ((char *)v->buf) + st_ind * v->elen;
+    res->buf = new_buf;
+    res->cap = v->cap - (st_ind + 1);
+    res->count = new_count;
+    res->elen = v->elen;
+    return;
+}
+
+size_t vec_index_of(vec *v, void *elem)
+{
+    return (elem - v->buf) / v->elen;
 }
 
 void vec_destroy(vec *v)

@@ -41,6 +41,7 @@ struct expression_nodes
 {
     slice val;
     uint64_t type;
+    size_t offst, offed;
 };
 
 struct expression
@@ -50,6 +51,7 @@ struct expression
                     // an array assignment needs to be evaluated differently
                     // than a regular expression
     bool must_eval; // the expression must be evaluated at compile-time?
+    node *parent;
 };
 
 struct type

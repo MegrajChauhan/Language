@@ -4,6 +4,7 @@
 #include "nodes.h"
 #include "error.h"
 #include "defs.h"
+#include "maps.h"
 #include <stdlib.h>
 #include <stdbool.h>
 
@@ -48,10 +49,14 @@ void ast_destroy(ast *tree);
 
 bool ast_array_length_expr(ast *tree, expression *expr, error *e);
 
-expression_nodes *ast_find_lowest_precedence(expression *expr);
+// expression_nodes *ast_find_lowest_precedence(expression *expr);
+bool ast_is_operator(expression_nodes *n);
 
-expression_nodes *ast_find_binary_minus(expression *expr);
+bool ast_find_and_report_operator(expression *expr, uint64_t kind, error *e);
 
+bool ast_is_binary_oper(expression *expr, expression_nodes *n);
+
+expression_nodes *ast_find_node(expression *expr, uint64_t kind);
 /*
 
 (), [],

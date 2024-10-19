@@ -32,4 +32,8 @@ bool vec_crunch(vec *v);
 
 void vec_destroy(vec *v);
 
+void vec_subvec(vec *v, vec *res, size_t st_ind);
+
+size_t vec_index_of(vec *v, void *elem);
+
 #endif

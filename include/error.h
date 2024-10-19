@@ -29,6 +29,7 @@ enum
 
     REDECLARATION,
     INVALID_TYPE_EXPR,
+    INVALID_EXPR,
 };
 
 typedef struct error error;
@@ -36,6 +37,7 @@ typedef struct error_entry error_entry;
 typedef struct error_unexp_tok error_unexp_tok;
 typedef struct error_redeclr error_redeclr;
 typedef struct error_inval_type_expr error_inval_type_expr;
+typedef struct error_inval_expr error_inval_expr;
 
 struct error_entry
 {
@@ -71,6 +73,12 @@ struct error_inval_type_expr
     type *_the_node_;
     type *st;
     node *n;
+};
+
+struct error_inval_expr
+{
+    expression *expr;
+    size_t err_off_st, err_off_ed;
 };
 
 struct error

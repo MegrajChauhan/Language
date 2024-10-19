@@ -85,6 +85,8 @@ bool parse_add_expression(parser *p, expression *expr, uint64_t until)
         n.type = tok.kind;
         n.val._s = tok.value._s;
         n.val._e = tok.value._e;
+        n.offst = tok.offset;
+        n.offed = p->lex->context->offset;
         if (!vec_push(expr->nodes, &n))
         {
             internal_err();
@@ -101,7 +103,7 @@ bool parse_add_expression(parser *p, expression *expr, uint64_t until)
     return true;
 }
 
-bool parser_gen_type(parser *p, type *t)
+bool parser_gen_type(parser *p, type *t, node *parent)
 {
     // 't' will be allocated
     token tok;
@@ -189,6 +191,7 @@ bool parser_gen_type(parser *p, type *t)
                 if (!parse_add_expression(p, &curr->expr, CLOSE_BIGBRAC))
                     return false;
                 curr->expr._type = ARR_LENGTH;
+                curr->expr.parent = parent;
                 // Array length evaluation is not compulsory to be known at
                 // compile-time
             }
@@ -240,25 +243,6 @@ bool parse_var_declr(parser *p, bool _const, token *old_tok)
     // we have the name of the variable now
     if (!lexer_peek_token(p->lex, &temp))
         return false;
-    if (temp.kind == COLON)
-    {
-        // we have been given the types
-        lexer_next_token(p->lex, &temp); // consume the colon
-        t = malloc(sizeof(type));
-        if (!t)
-        {
-            internal_err();
-            return false;
-        }
-        if (!parser_gen_type(p, t))
-            return false;
-        if (!lexer_peek_token(p->lex, &temp))
-            return false;
-    }
-    if (!parser_check_token(p, &temp, ASSIGN))
-        return false;
-    lexer_next_token(p->lex, &temp); // won't fail
-    // the type deduction will be complicated but we need to do that at later steps
     node *n = (node *)malloc(sizeof(node));
     node_var_declr *vd = (node_var_declr *)malloc(sizeof(node_var_declr));
     if (!n)
@@ -272,13 +256,29 @@ bool parse_var_declr(parser *p, bool _const, token *old_tok)
         internal_err();
         return false;
     }
-    if (!parse_add_expression(p, &vd->expr, SEMI_COLON))
+    if (temp.kind == COLON)
     {
-        free(vd);
-        free(n);
-        return false;
+        // we have been given the types
+        lexer_next_token(p->lex, &temp); // consume the colon
+        t = malloc(sizeof(type));
+        if (!t)
+        {
+            internal_err();
+            goto _err_;
+        }
+        if (!parser_gen_type(p, t, n))
+            goto _err_;
+        if (!lexer_peek_token(p->lex, &temp))
+            goto _err_;
     }
+    if (!parser_check_token(p, &temp, ASSIGN))
+        goto _err_;
+    lexer_next_token(p->lex, &temp); // won't fail
+    // the type deduction will be complicated but we need to do that at later steps
+    if (!parse_add_expression(p, &vd->expr, SEMI_COLON))
+        goto _err_;
     vd->expr._type = ASSIGN;
+    vd->expr.parent = n;
     if (_const)
         vd->expr.must_eval = true;
     n->_node = (void *)vd;
@@ -295,11 +295,13 @@ bool parse_var_declr(parser *p, bool _const, token *old_tok)
     if (!namespace_add_node(p->ns, n))
     {
         internal_err();
-        free(n);
-        free(vd);
-        return false;
+        goto _err_;
     }
     return true;
+_err_:
+    free(n);
+    free(vd);
+    return false;
 }
 
 bool parse(parser *p)

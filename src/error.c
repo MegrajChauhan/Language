@@ -27,6 +27,8 @@ size_t get_err_len(uint64_t kind)
         return sizeof(error_redeclr);
     case INVALID_TYPE_EXPR:
         return sizeof(error_inval_type_expr);
+    case INVALID_EXPR:
+        return sizeof(error_inval_expr);
     }
     return 0;
 }
