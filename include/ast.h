@@ -13,9 +13,10 @@ typedef struct ast_node ast_node;
 
 enum
 {
-    SIMPLE,  // the ast node is a simple value
+    SIMPLE, // the ast node is a simple value
+    OPER,
     ARRAY_INDEXING,
-    AST,     // the node itself is another AST
+    AST, // the node itself is another AST
 };
 
 struct ast_node
@@ -25,7 +26,7 @@ struct ast_node
     uint8_t kind;
     union
     {
-        node *n;
+        expression_nodes *n;
         vec *nodes;
         ast *child;
     };
@@ -33,7 +34,7 @@ struct ast_node
 
 struct ast
 {
-    ast_node nodes;
+    ast_node *root;
     uint64_t kind; // inherit the expression's kind
 };
 
@@ -58,9 +59,11 @@ bool ast_is_binary_oper(expression *expr, expression_nodes *n);
 
 expression_nodes *ast_find_node(expression *expr, uint64_t kind);
 
-ast_node *ast_get_root_node(expression *expr, error *err, file_context *cont);
+ast_node *ast_get_root_node(expression *expr);
 
-bool ast_form_node_binary(expression *expr, expression_nodes *oper, ast_node *new_node, error *err, file_context *cont);
+bool ast_build_tree(ast_node *root, expression *expr, error *e, file_context *fcont);
+
+// bool ast_form_node_binary(expression *expr, expression_nodes *oper, ast_node *new_node, error *err, file_context *cont);
 /*
 
 (), [],

@@ -79,6 +79,17 @@ void vec_subvec(vec *v, vec *res, size_t st_ind)
     return;
 }
 
+void vec_prevec(vec *v, vec *res, size_t upto)
+{
+    size_t new_count = v->count - upto;
+    void *new_buf = (v->buf);
+    res->buf = new_buf;
+    res->cap = v->cap;
+    res->count = upto+1;
+    res->elen = v->elen;
+    return;
+}
+
 size_t vec_index_of(vec *v, void *elem)
 {
     return (elem - v->buf) / v->elen;

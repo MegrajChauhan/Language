@@ -34,6 +34,8 @@ void vec_destroy(vec *v);
 
 void vec_subvec(vec *v, vec *res, size_t st_ind);
 
+void vec_prevec(vec *v, vec *res, size_t upto);
+
 size_t vec_index_of(vec *v, void *elem);
 
 #endif
