@@ -70,7 +70,7 @@ bool parse_add_expression(parser *p, expression *expr, uint64_t until)
             lexer_next_token(p->lex, &tok);
             if (!lexer_request_character(p->lex, &tok))
                 return false;
-            tok.kind = CHAR;
+            tok.kind = STR;
             str = true;
         }
         if (tok.kind == QUOTE)
@@ -78,7 +78,7 @@ bool parse_add_expression(parser *p, expression *expr, uint64_t until)
             lexer_next_token(p->lex, &tok);
             if (!lexer_request_string(p->lex, &tok))
                 return false;
-            tok.kind = STRING;
+            tok.kind = STR;
             str = true;
         }
         expression_nodes n;

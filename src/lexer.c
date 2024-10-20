@@ -279,7 +279,16 @@ bool lexer_next_token(lexer *l, token *t)
                     consume(l);
                     break;
                 case '>':
-                    t->kind = RSHIFT;
+                    switch (*(l->iter + 2))
+                    {
+                    case '=':
+                        t->kind = RSHIFT_EQ;
+                        consume(l);
+                        break;
+                    default:
+                        t->kind = RSHIFT;
+                        consume(l);
+                    }
                     consume(l);
                     break;
                 default:
@@ -295,8 +304,17 @@ bool lexer_next_token(lexer *l, token *t)
                     t->kind = LESS_EQ;
                     consume(l);
                     break;
-                case '>':
-                    t->kind = LSHIFT;
+                case '<':
+                    switch (*(l->iter + 2))
+                    {
+                    case '=':
+                        t->kind = LSHIFT_EQ;
+                        consume(l);
+                        break;
+                    default:
+                        t->kind = LSHIFT;
+                        consume(l);
+                    }
                     consume(l);
                     break;
                 default:

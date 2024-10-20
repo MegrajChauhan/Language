@@ -121,6 +121,8 @@ enum
     AND_EQ,
     NOT_EQ,
     XOR_EQ,
+    LSHIFT_EQ,
+    RSHIFT_EQ,
 
     // demand operators
     // absolutely necessary
@@ -138,6 +140,7 @@ enum
     /* OTHER TOKEN TYPES */
     NUM_INT,
     NUM_FLOAT,
+    STR,
     IDENTIFIER,
 
     REQUEST, // The parser makes a request for something to which this token is returned
