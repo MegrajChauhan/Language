@@ -7,6 +7,7 @@
 #include "defs.h"
 #include "namespace.h"
 #include "error.h"
+#include "ast.h"
 #include <stdlib.h>
 
 bool analyse(namespace *ns, error *e);

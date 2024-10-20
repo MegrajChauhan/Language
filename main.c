@@ -8,7 +8,7 @@ int main()
         printf("GEN MAP\n");
         return 0;
     }
-    char name[] = "examples/analysetest.l";
+    char name[] = "examples/asttest.l";
     context *c = create_context(name);
     if (!c)
     {

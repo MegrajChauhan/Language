@@ -70,10 +70,10 @@ bool vec_crunch(vec *v)
 void vec_subvec(vec *v, vec *res, size_t st_ind)
 {
     // make a sub vector
-    size_t new_count = v->count - st_ind;
-    void *new_buf = ((char *)v->buf) + st_ind * v->elen;
+    size_t new_count = v->count - (++st_ind);
+    void *new_buf = ((char *)v->buf) + (st_ind) * v->elen;
     res->buf = new_buf;
-    res->cap = v->cap - (st_ind + 1);
+    res->cap = v->cap - (st_ind);
     res->count = new_count;
     res->elen = v->elen;
     return;
@@ -81,11 +81,10 @@ void vec_subvec(vec *v, vec *res, size_t st_ind)
 
 void vec_prevec(vec *v, vec *res, size_t upto)
 {
-    size_t new_count = v->count - upto;
     void *new_buf = (v->buf);
     res->buf = new_buf;
     res->cap = v->cap;
-    res->count = upto+1;
+    res->count = upto;
     res->elen = v->elen;
     return;
 }

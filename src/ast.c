@@ -18,9 +18,16 @@ static bool ast_is_node_simple(expression_nodes *n)
     {
     case NUM_INT:
     case NUM_FLOAT:
+    case IDENTIFIER:
         return true;
     }
     return false;
+}
+
+static bool ast_is_node_oper(expression_nodes *n)
+{
+    uint64_t temp;
+    return find_oper(&n->val, &temp);
 }
 
 ast *ast_init()
@@ -40,7 +47,12 @@ bool expr_to_ast(ast *tree, expression *expr, error *e, file_context *cont)
     switch (expr->_type)
     {
     case ARR_LENGTH:
+    case NORMAL_EXPR:
+        if (!ast_array_length_expr(tree, expr, e, cont))
+            return false;
+        break;
     }
+    return true;
 }
 
 void ast_destroy(ast *tree)
@@ -68,23 +80,21 @@ bool ast_array_length_expr(ast *tree, expression *expr, error *e, file_context *
     // just get something and start from there
     tree->root = ast_get_root_node(expr);
 
-    while (tree->root && !ast_is_binary_oper(expr, tree->root->n))
+    if (expr->nodes->count == 1)
     {
-        vec sub;
-        size_t ind = vec_index_of(expr->nodes, tree->root->n);
-        if (ind >= expr->nodes->count)
+        // we are done with the expression
+        expression_nodes *ret = (expression_nodes *)vec_at(expr->nodes, 0);
+        if (ast_is_node_oper(ret) || !ast_is_node_simple(ret))
         {
-            ast_report_operator(expr, (expression_nodes *)vec_at(expr->nodes, 0), e, cont);
+            // this last node cannot be an operator
+            ast_report_operator(expr, ret, e, cont);
             return false;
         }
-        vec_subvec(expr->nodes, &sub, ind);
-        free(tree->root);
-
-        expression subexpr;
-        subexpr.nodes = &sub;
-        subexpr.parent = expr->parent;
-
-        tree->root = ast_get_root_node(&subexpr);
+        tree->root->left = NULL;
+        tree->root->right = NULL;
+        tree->root->kind = SIMPLE;
+        tree->root->n = ret;
+        return true;
     }
 
     if (!tree->root)
@@ -93,6 +103,7 @@ bool ast_array_length_expr(ast *tree, expression *expr, error *e, file_context *
         ast_report_operator(expr, (expression_nodes *)vec_at(expr->nodes, 0), e, cont);
         return false;
     }
+    return ast_build_tree(tree->root, expr, e, cont);
 }
 
 bool ast_is_operator(expression_nodes *n)
@@ -115,7 +126,7 @@ void ast_report_operator(expression *expr, expression_nodes *err_node, error *e,
 bool ast_is_binary_oper(expression *expr, expression_nodes *n)
 {
     size_t ind = vec_index_of(expr->nodes, n);
-    if (ind == 0 || ind >= (expr->nodes->count -1))
+    if (ind == 0 || ind >= (expr->nodes->count - 1))
         return false;
     expression_nodes *left = (expression_nodes *)vec_at(expr->nodes, ind - 1);
     expression_nodes *right = (expression_nodes *)vec_at(expr->nodes, ind + 1);
@@ -167,6 +178,12 @@ ast_node *ast_get_root_node(expression *expr)
         new_node->n = root;
     else if ((root = ast_find_node(expr, MOD)) != NULL)
         new_node->n = root;
+    else if ((root = ast_find_node(expr, NOT)) != NULL)
+        new_node->n = root;
+    else if ((root = ast_find_node(expr, UNARY_MINUS)) != NULL)
+        new_node->n = root;
+    else if ((root = ast_find_node(expr, UNARY_PLUS)) != NULL)
+        new_node->n = root;
     else if ((root = ast_find_node(expr, INC)) != NULL)
         new_node->n = root;
     else if ((root = ast_find_node(expr, DEC)) != NULL)
@@ -185,8 +202,56 @@ bool ast_build_tree(ast_node *root, expression *expr, error *e, file_context *fc
 {
     // using the bloody root, build the bloody tree
     size_t ind = vec_index_of(expr->nodes, root->n);
-    if (ind == 0 || ind >= (expr->nodes->count))
+    if (expr->nodes->count <= 1)
+    {
+        // we are done with the expression
+        if (expr->nodes->count != 0)
+        {
+            expression_nodes *ret = (expression_nodes *)vec_at(expr->nodes, 0);
+            if (ast_is_node_oper(ret) || !ast_is_node_simple(ret))
+            {
+                ast_report_operator(expr, ret, e, fcont);
+                return false;
+            }
+            root->left = NULL;
+            root->right = NULL;
+            root->kind = SIMPLE;
+            root->n = ret;
+            return true;
+        }
+    }
+    // Now the nodes may be just an array indexing
+    vec prevec, subvec;
+    vec_prevec(expr->nodes, &prevec, ind);
+    vec_subvec(expr->nodes, &subvec, ind);
+    expression left, right;
+    left.nodes = &prevec;
+    left.parent = expr->parent;
+    left._type = expr->_type;
+    right.nodes = &subvec;
+    right.parent = expr->parent;
+    right._type = expr->_type;
+    root->left = ast_get_root_node(&left);
+    if (!root->left && prevec.count > 1)
         return false;
-    expression_nodes *left = (expression_nodes *)vec_at(expr->nodes, ind - 1);
-    expression_nodes *right = (expression_nodes *)vec_at(expr->nodes, ind + 1);
+    root->left = (ast_node *)malloc(sizeof(ast_node));
+    if (!root->left)
+    {
+        internal_err();
+        return false;
+    }
+    root->right = ast_get_root_node(&right);
+    if (!root->right && subvec.count > 1)
+    {
+        free(root->left);
+        return false;
+    }
+    root->right = (ast_node *)malloc(sizeof(ast_node));
+    if (!root->right)
+    {
+        free(root->left);
+        internal_err();
+        return false;
+    }
+    return (ast_build_tree(root->left, &left, e, fcont) && ast_build_tree(root->right, &right, e, fcont));
 }

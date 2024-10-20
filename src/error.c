@@ -115,6 +115,10 @@ void error_evaluate(error *e)
             fatal = true;
             __redeclration(ent);
             break;
+        case INVALID_EXPR:
+            fatal = true;
+            __invalid_expr(ent);
+            break;
         }
     }
     if (fatal)
@@ -318,6 +322,51 @@ void __redeclration(error_entry *e)
             putc(*i, stderr);
             i++;
         }
+    }
+    putc('\n', stderr);
+}
+
+void __invalid_expr(error_entry *e)
+{
+    error_inval_expr *err = e->err;
+    node *parent = err->expr->parent;
+    fprintf(stderr, "%s:%lu:%lu: Invalid expression found.\n", e->error_context->entry.fname, parent->l_st, parent->c_st);
+    fprintf(stderr, "LINE:");
+    char *i = e->error_context->entry.stream + (parent->o_st);
+    size_t X = 0;
+    expression_nodes *first = (expression_nodes *)vec_at(err->expr->nodes, 0);
+    expression_nodes *last = (expression_nodes *)vec_at(err->expr->nodes, err->expr->nodes->count - 1);
+    size_t node_pos = err->err_off_st - parent->o_st;
+    size_t expr_start = first->offst - parent->o_st;
+    size_t node_pos_len = err->err_off_ed - parent->o_st;
+    size_t expr_end = last->offed - parent->o_st;
+    size_t count = parent->l_st;
+    while (true)
+    {
+        size_t len = 0;
+        while (*i != '\n' && *i != 0)
+        {
+            putc(*i, stderr);
+            i++;
+            len++;
+        }
+        putc('\n', stderr);
+        putc('\t', stderr);
+        for (size_t x = 0; x < len; X++, x++)
+        {
+            if ((X >= expr_start && X < node_pos) || (X >= node_pos_len && X < expr_end))
+                putc('~', stderr);
+            else if (X >= node_pos && X < node_pos_len)
+                putc('^', stderr);
+            else
+                putc(' ', stderr);
+        }
+        if (count == parent->l_ed)
+            break;
+        putc('\n', stderr);
+        putc('\t', stderr);
+        count++;
+        i++;
     }
     putc('\n', stderr);
 }

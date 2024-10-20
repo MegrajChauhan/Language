@@ -40,6 +40,16 @@ bool variable_declaration(namespace *ns, node *n, error *e)
     if (!analyse_type(ns, n, vd->_t, e))
         return false;
 
+    // evaluate the assigned expression
+    ast *test = ast_init();
+    if (!test)
+    {
+        internal_err();
+        return false;
+    }
+    if (!expr_to_ast(test, &vd->expr, e, ns->cont))
+        return false;
+    ast_destroy(test);
     // add to the symbol table
     symtable_entry new_ent;
     new_ent.kind = _VARIABLE;
@@ -82,6 +92,15 @@ bool analyse_type(namespace *ns, node *n, type *t, error *e)
                     if (!curr->expr.nodes)
                     {
                         // we need to deduce the length ourselves from the given array
+                        ast *test = ast_init();
+                        if (!test)
+                        {
+                            internal_err();
+                            return false;
+                        }
+                        if (!expr_to_ast(test, &curr->expr, e, ns->cont))
+                            return false;
+                        ast_destroy(test);
                     }
                     curr = curr->next;
                 }

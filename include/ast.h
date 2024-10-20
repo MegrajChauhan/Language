@@ -13,6 +13,7 @@ typedef struct ast_node ast_node;
 
 enum
 {
+    NONE,   // for unary 
     SIMPLE, // the ast node is a simple value
     OPER,
     ARRAY_INDEXING,

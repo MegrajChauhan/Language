@@ -65,21 +65,33 @@ bool parse_add_expression(parser *p, expression *expr, uint64_t until)
         }
         /// NOTE: We are not checking of the token is valid for an expression here.
         /// That extra check can be done with the expression evaluator which eases things
-        if (tok.kind == SINGLE_QUOTE)
+        switch (tok.kind)
         {
+        case SINGLE_QUOTE:
             lexer_next_token(p->lex, &tok);
             if (!lexer_request_character(p->lex, &tok))
                 return false;
             tok.kind = STR;
             str = true;
-        }
-        if (tok.kind == QUOTE)
-        {
+            break;
+        case QUOTE:
             lexer_next_token(p->lex, &tok);
             if (!lexer_request_string(p->lex, &tok))
                 return false;
             tok.kind = STR;
             str = true;
+            break;
+        case PLUS:
+        case MINUS:
+        {
+            // check if unary
+            expression_nodes *prev = (expression_nodes *)vec_at(expr->nodes, expr->nodes->count - 1);
+            uint64_t temp;
+            if (find_oper(&tok.value, &temp))
+                // so unary
+                tok.kind = tok.kind - 1;
+            break;
+        }
         }
         expression_nodes n;
         n.type = tok.kind;
@@ -277,7 +289,7 @@ bool parse_var_declr(parser *p, bool _const, token *old_tok)
     // the type deduction will be complicated but we need to do that at later steps
     if (!parse_add_expression(p, &vd->expr, SEMI_COLON))
         goto _err_;
-    vd->expr._type = ASSIGN;
+    vd->expr._type = NORMAL_EXPR;
     vd->expr.parent = n;
     if (_const)
         vd->expr.must_eval = true;

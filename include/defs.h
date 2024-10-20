@@ -95,7 +95,9 @@ enum
     QUOTE,
     SINGLE_QUOTE, // we need to fit this somewhere
     ACCESS_DOT,
+    UNARY_PLUS,
     PLUS,
+    UNARY_MINUS,
     MINUS,
     MUL,
     DIV,
