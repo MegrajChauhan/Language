@@ -87,7 +87,7 @@ bool parse_add_expression(parser *p, expression *expr, uint64_t until)
             // check if unary
             expression_nodes *prev = (expression_nodes *)vec_at(expr->nodes, expr->nodes->count - 1);
             uint64_t temp;
-            if (find_oper(&tok.value, &temp))
+            if (find_oper(&prev->val, &temp))
                 // so unary
                 tok.kind = tok.kind - 1;
             break;

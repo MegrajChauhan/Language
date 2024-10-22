@@ -89,7 +89,7 @@ bool analyse_type(namespace *ns, node *n, type *t, error *e)
                 // handling multi-dimensional arrays
                 while (curr && curr->base == ARRAY)
                 {
-                    if (!curr->expr.nodes)
+                    if (curr->expr.nodes)
                     {
                         // we need to deduce the length ourselves from the given array
                         ast *test = ast_init();
