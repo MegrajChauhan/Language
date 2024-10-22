@@ -251,7 +251,10 @@ void __inval_string(error_entry *e)
 void __invalid_type_expr(error_entry *e)
 {
     error_inval_type_expr *err = e->err;
-    fprintf(stderr, "%s:%lu:%lu: Invalid type expression encountered.\n", e->error_context->entry.fname, err->n->l_st, err->_the_node_->col);
+    char err_type[err->_the_node_->offe - err->_the_node_->off + 1];
+    memcpy(err_type, e->error_context->entry.stream + err->_the_node_->off, sizeof(err_type) - 1);
+    err_type[sizeof(err_type)] = 0;
+    fprintf(stderr, "%s:%lu:%lu: Invalid type expression encountered. Expected a valid type in the expression. Unexpected '%s'.\n", e->error_context->entry.fname, err->n->l_st, err->_the_node_->col, err_type);
     fprintf(stderr, "LINE:\n\t");
     char *i = e->error_context->entry.stream + err->n->o_st;
     size_t expr_start = err->st->off - err->n->o_st;
@@ -329,9 +332,12 @@ void __redeclration(error_entry *e)
 void __invalid_expr(error_entry *e)
 {
     error_inval_expr *err = e->err;
+    char err_node[err->err_off_ed - err->err_off_st + 1];
+    memcpy(err_node, e->error_context->entry.stream + err->err_off_st, sizeof(err_node) - 1);
+    err_node[sizeof(err_node)] = 0;
     node *parent = err->expr->parent;
-    fprintf(stderr, "%s:%lu:%lu: Invalid expression found.\n", e->error_context->entry.fname, parent->l_st, parent->c_st);
-    fprintf(stderr, "LINE:");
+    fprintf(stderr, "%s:%lu:%lu: Invalid expression found. Unexpected '%s' in the expression.\n", e->error_context->entry.fname, parent->l_st, parent->c_st, err_node);
+    fprintf(stderr, "LINE:\n\t");
     char *i = e->error_context->entry.stream + (parent->o_st);
     size_t X = 0;
     expression_nodes *first = (expression_nodes *)vec_at(err->expr->nodes, 0);

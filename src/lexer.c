@@ -289,7 +289,6 @@ bool lexer_next_token(lexer *l, token *t)
                         t->kind = RSHIFT;
                         consume(l);
                     }
-                    consume(l);
                     break;
                 default:
                     t->kind = GREATER_THAN;
@@ -315,7 +314,6 @@ bool lexer_next_token(lexer *l, token *t)
                         t->kind = LSHIFT;
                         consume(l);
                     }
-                    consume(l);
                     break;
                 default:
                     t->kind = LESS_THAN;

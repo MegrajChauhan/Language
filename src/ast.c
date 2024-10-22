@@ -30,6 +30,21 @@ static bool ast_is_node_oper(expression_nodes *n)
     return find_oper(&n->val, &temp);
 }
 
+static bool ast_is_node_unary_oper(expression_nodes *n)
+{
+    switch (n->type)
+    {
+    case UNARY_MINUS:
+    case UNARY_PLUS:
+    case INC:
+    case DEC:
+    case NOT:
+    case LNOT:
+        return true;
+    }
+    return false;
+}
+
 ast *ast_init()
 {
     ast *tree = (ast *)malloc(sizeof(ast));
@@ -71,7 +86,9 @@ bool ast_array_length_expr(ast *tree, expression *expr, error *e, file_context *
     // In this case, the expression cannot be extremely complicated
     // It should be simple enough
     // bool must_eval = true;
-    return (tree->root = ast_build_tree(expr, e, cont)) != NULL;
+    if (!ast_replace_paren(expr, expr, e, cont))
+        return false;
+    return (tree->root = ast_build_tree(expr, expr, e, cont)) != NULL;
 }
 
 bool ast_is_operator(expression_nodes *n)
@@ -156,7 +173,7 @@ ast_node *ast_get_root_node(expression *expr)
         new_node->n = root;
     else if ((root = ast_find_node(expr, DEC)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, OPEN_PAREN)) != NULL)
+    else if ((root = ast_find_node(expr, SUB_EXPR)) != NULL)
         new_node->n = root;
     else if ((root = ast_find_node(expr, NUM_INT)) != NULL)
     {
@@ -176,15 +193,25 @@ ast_node *ast_get_root_node(expression *expr)
     return new_node;
 }
 
-ast_node *ast_build_tree(expression *expr, error *e, file_context *fcont)
+ast_node *ast_build_tree(expression *parent, expression *expr, error *e, file_context *fcont)
 {
     // using the bloody root, build the bloody tree
     ast_node *root = ast_get_root_node(expr);
     if (!root)
     {
         // error
-        ast_report(expr, (expression_nodes *)vec_at(expr->nodes, 0), e, fcont);
+        ast_report(parent, (expression_nodes *)vec_at(expr->nodes, 0), e, fcont);
         return NULL;
+    }
+
+    if (root->kind == SUB_EXPR)
+    {
+        expression_nodes *sub = root->n;
+        free(root);
+        root = ast_build_tree(sub->sub_expr, sub->sub_expr, e, fcont);
+        if (!root)
+            return false;
+        return root; // done right here
     }
 
     size_t ind = vec_index_of(expr->nodes, root->n);
@@ -204,24 +231,112 @@ ast_node *ast_build_tree(expression *expr, error *e, file_context *fcont)
     right.parent = expr->parent;
     right._type = expr->_type;
 
+    if (ast_is_node_unary_oper(root->n))
+    {
+        // this means that we cannot have operands on both side
+        // we won't have ++a and only have a++
+        // pretty much all unary operators only expect operands on the right side
+        bool _register_err_ = false;
+        expression *_fault_ = NULL;
+        if (root->n->type == INC || root->n->type == DEC)
+        {
+            if (right.nodes->count > 0)
+            {
+                _register_err_ = true;
+                _fault_ = &right;
+            }
+        }
+        else if (root->left)
+        {
+            _register_err_ = true;
+            _fault_ = &left;
+        }
+        if (_register_err_)
+        {
+            error_inval_expr err;
+            expression_nodes *st = (expression_nodes *)vec_at(_fault_->nodes, 0);
+            err.err_off_st = st->offst;
+            err.err_off_ed = st->offed;
+            err.expr = parent;
+            error_add_complex(e, &err, fcont, UNARY_OPER_MULTIPLE_OPERAND);
+            ast_node_destroy(root);
+            return NULL;
+        }
+    }
+
     if (subvec.count > 0)
     {
-        root->right = ast_build_tree(&right, e, fcont);
+        root->right = ast_build_tree(expr, &right, e, fcont);
         if (!root->right)
         {
             free(root);
             return NULL;
         }
-        if (prevec.count > 0)
+    }
+    if (prevec.count > 0)
+    {
+        root->left = ast_build_tree(expr, &left, e, fcont);
+        if (!root->left)
         {
-            root->left = ast_build_tree(&left, e, fcont);
-            if (!root->left)
-            {
+            if (subvec.count > 0)
                 ast_node_destroy(root->right);
-                free(root);
-                return NULL;
-            }
+            free(root);
+            return NULL;
         }
     }
     return root;
+}
+
+bool ast_replace_paren(expression *parent, expression *expr, error *e, file_context *cont)
+{
+    expression_nodes *paren;
+    while ((paren = ast_find_node(expr, OPEN_PAREN)) != NULL)
+    {
+        size_t start = vec_index_of(expr->nodes, paren) + 1;
+        size_t ind = start;
+        bool close_found = false;
+        while (!close_found)
+        {
+            if (ind >= expr->nodes->count)
+            {
+                // we reached the end with no closing parenthesis
+                error_inval_expr err;
+                err.err_off_st = paren->offst;
+                err.err_off_ed = paren->offed;
+                err.expr = parent;
+                error_add_complex(e, &err, cont, STARY_OPENING_PARENTHESIS);
+                return false;
+            }
+            expression_nodes *curr = (expression_nodes *)vec_at(expr->nodes, ind);
+            switch (curr->type)
+            {
+            case OPEN_PAREN:
+            {
+                expression sub;
+                vec_subvec(expr->nodes, sub.nodes, ind);
+                if (!ast_replace_paren(parent, &sub, e, cont))
+                    return false;
+                // after that call the current pointer now points to the new sub expression
+                ind += ((expression *)paren->sub_expr)->nodes->count + 1;
+                break;
+            }
+            case CLOSE_PAREN:
+            {
+                size_t end = ind;
+                expression_nodes sub;
+                sub.sub_expr = vec_create_sub(parent->nodes, start + 1, end - 1);
+                if (!sub.sub_expr)
+                    return false;
+                sub.type = SUB_EXPR;
+                sub.offst = paren->offst;
+                sub.offed = curr->offed;
+                vec_remove(parent->nodes, start, end, &sub);
+                close_found = true;
+                break;
+            }
+            }
+            ind++;
+        }
+    }
+    return true;
 }

@@ -38,4 +38,8 @@ void vec_prevec(vec *v, vec *res, size_t upto);
 
 size_t vec_index_of(vec *v, void *elem);
 
+void vec_remove(vec *v, size_t ind_start, size_t upto, void *elem);
+
+vec *vec_create_sub(vec *parent, size_t st, size_t ed);
+
 #endif

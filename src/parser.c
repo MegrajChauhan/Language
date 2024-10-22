@@ -87,7 +87,7 @@ bool parse_add_expression(parser *p, expression *expr, uint64_t until)
             // check if unary
             expression_nodes *prev = (expression_nodes *)vec_at(expr->nodes, expr->nodes->count - 1);
             uint64_t temp;
-            if (find_oper(&prev->val, &temp))
+            if (find_oper(&prev->val, &temp) || expr->nodes->count == 0)
                 // so unary
                 tok.kind = tok.kind - 1;
             break;
@@ -98,7 +98,7 @@ bool parse_add_expression(parser *p, expression *expr, uint64_t until)
         n.val._s = tok.value._s;
         n.val._e = tok.value._e;
         n.offst = tok.offset;
-        n.offed = p->lex->context->offset;
+        n.offed = tok.offset + (tok.value._e - tok.value._s);
         if (!vec_push(expr->nodes, &n))
         {
             internal_err();

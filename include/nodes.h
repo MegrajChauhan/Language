@@ -19,6 +19,7 @@ enum
     ARR_ASSIGNMENT,
     NORMAL_EXPR,
     STRING_ASSIGN,
+    SUB_EXPR,
 };
 
 typedef struct type type;
@@ -39,9 +40,16 @@ struct node
 
 struct expression_nodes
 {
-    slice val;
     uint64_t type;
-    size_t offst, offed;
+    union
+    {
+        struct
+        {
+            slice val;
+            size_t offst, offed;
+        };
+        void *sub_expr;
+    };
 };
 
 struct expression

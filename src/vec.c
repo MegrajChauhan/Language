@@ -71,7 +71,7 @@ void vec_subvec(vec *v, vec *res, size_t st_ind)
 {
     // make a sub vector
     size_t new_count = v->count - (++st_ind);
-    void *new_buf = ((char *)v->buf) + (st_ind) * v->elen;
+    void *new_buf = ((char *)v->buf) + (st_ind)*v->elen;
     res->buf = new_buf;
     res->cap = v->cap - (st_ind);
     res->count = new_count;
@@ -98,4 +98,32 @@ void vec_destroy(vec *v)
 {
     free(v->buf);
     free(v);
+}
+
+void vec_remove(vec *v, size_t ind_start, size_t upto, void *elem)
+{
+    void *st = (char *)v->buf + (ind_start * v->elen) + ((elem) ? v->elen : 0);
+    size_t removing = (upto - ind_start) + 1;
+    size_t length = removing * v->elen;
+    memcpy(st, (char *)st + length, length);
+    if (elem)
+    {
+        memcpy((char *)st - v->elen, elem, v->elen);
+        v->count++;
+    }
+    v->count -= removing;
+}
+
+vec *vec_create_sub(vec *parent, size_t st, size_t ed)
+{
+    size_t len = (ed - st) + 1;
+    vec *child = vec_init(len, parent->elen);
+    if (!child)
+        return NULL;
+    void *_st_ = (char *)parent->buf + (st * parent->elen);
+    size_t length = len * parent->elen;
+    memcpy(child->buf, (char *)_st_, length);
+    child->count = len;
+    child->elen = parent->elen;
+    return child;
 }
