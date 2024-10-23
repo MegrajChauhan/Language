@@ -18,6 +18,7 @@ enum
     ARRAY_INDEXING,
     AST,  // the node itself is another AST
     IDEN, // The node is a variable
+    CHILD_EXPR,
 };
 
 struct ast_node
@@ -65,6 +66,8 @@ ast_node *ast_get_root_node(expression *expr);
 ast_node *ast_build_tree(expression *parent, expression *expr, error *e, file_context *fcont);
 
 bool ast_replace_paren(expression *parent, expression *expr, error *e, file_context *cont);
+
+bool ast_handle_possible_identifiers(expression *expr, error *e, file_context *cont);
 
 // bool ast_form_node_binary(expression *expr, expression_nodes *oper, ast_node *new_node, error *err, file_context *cont);
 /*

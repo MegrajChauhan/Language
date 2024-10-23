@@ -174,7 +174,10 @@ ast_node *ast_get_root_node(expression *expr)
     else if ((root = ast_find_node(expr, DEC)) != NULL)
         new_node->n = root;
     else if ((root = ast_find_node(expr, SUB_EXPR)) != NULL)
+    {
+        new_node->kind = CHILD_EXPR;
         new_node->n = root;
+    }
     else if ((root = ast_find_node(expr, NUM_INT)) != NULL)
     {
         new_node->kind = SIMPLE;
@@ -204,7 +207,7 @@ ast_node *ast_build_tree(expression *parent, expression *expr, error *e, file_co
         return NULL;
     }
 
-    if (root->kind == SUB_EXPR)
+    if (root->kind == CHILD_EXPR)
     {
         expression_nodes *sub = root->n;
         free(root);
@@ -272,6 +275,17 @@ ast_node *ast_build_tree(expression *parent, expression *expr, error *e, file_co
             free(root);
             return NULL;
         }
+        if (root->right->kind == CHILD_EXPR)
+        {
+            expression_nodes *sub = root->right->n;
+            ast_node_destroy(root->right);
+            root->right = ast_build_tree(sub->sub_expr, sub->sub_expr, e, fcont);
+            if (!root->right)
+            {
+                ast_node_destroy(root->right);
+                return false;
+            }
+        }
     }
     if (prevec.count > 0)
     {
@@ -282,6 +296,18 @@ ast_node *ast_build_tree(expression *parent, expression *expr, error *e, file_co
                 ast_node_destroy(root->right);
             free(root);
             return NULL;
+        }
+        if (root->left->kind == CHILD_EXPR)
+        {
+            expression_nodes *sub = root->left->n;
+            ast_node_destroy(root->left);
+            root->left = ast_build_tree(sub->sub_expr, sub->sub_expr, e, fcont);
+            if (!root->left)
+            {
+                ast_node_destroy(root->left);
+                ast_node_destroy(root->right);
+                return false;
+            }
         }
     }
     return root;
@@ -349,4 +375,10 @@ bool ast_replace_paren(expression *parent, expression *expr, error *e, file_cont
     }
 
     return true;
+}
+
+bool ast_handle_possible_identifiers(expression *expr, error *e, file_context *cont)
+{
+    // we will specifically handle identifiers here.
+    
 }
