@@ -102,13 +102,14 @@ void vec_destroy(vec *v)
 
 void vec_remove(vec *v, size_t ind_start, size_t upto, void *elem)
 {
-    void *st = (char *)v->buf + (ind_start * v->elen) + ((elem) ? v->elen : 0);
+    void *dest = (char *)v->buf + ind_start * v->elen + ((elem) ? v->elen : 0);
     size_t removing = (upto - ind_start) + 1;
-    size_t length = removing * v->elen;
-    memcpy(st, (char *)st + length, length);
+    size_t remaining = (v->count - upto - 1) * v->elen;
+    void *src = (char *)v->buf + remaining;
+    memcpy(dest, src, remaining);
     if (elem)
     {
-        memcpy((char *)st - v->elen, elem, v->elen);
+        memcpy((char *)dest - v->elen, elem, v->elen);
         v->count++;
     }
     v->count -= removing;
@@ -122,7 +123,7 @@ vec *vec_create_sub(vec *parent, size_t st, size_t ed)
         return NULL;
     void *_st_ = (char *)parent->buf + (st * parent->elen);
     size_t length = len * parent->elen;
-    memcpy(child->buf, (char *)_st_, length);
+    memcpy(child->buf, _st_, length);
     child->count = len;
     child->elen = parent->elen;
     return child;

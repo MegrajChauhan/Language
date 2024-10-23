@@ -120,4 +120,10 @@ void __invalid_expr(error_entry *e);
 
 void __redeclration(error_entry *e);
 
+void __unary_oper_multiple_operand(error_entry *e);
+
+void __stray_closing_paren(error_entry *e);
+
+void __stray_opening_paren(error_entry *e);
+
 #endif

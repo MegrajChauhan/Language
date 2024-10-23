@@ -254,7 +254,7 @@ ast_node *ast_build_tree(expression *parent, expression *expr, error *e, file_co
         if (_register_err_)
         {
             error_inval_expr err;
-            expression_nodes *st = (expression_nodes *)vec_at(_fault_->nodes, 0);
+            expression_nodes *st = root->n;
             err.err_off_st = st->offst;
             err.err_off_ed = st->offed;
             err.expr = parent;
@@ -292,12 +292,12 @@ bool ast_replace_paren(expression *parent, expression *expr, error *e, file_cont
     expression_nodes *paren;
     while ((paren = ast_find_node(expr, OPEN_PAREN)) != NULL)
     {
-        size_t start = vec_index_of(expr->nodes, paren) + 1;
+        size_t start = vec_index_of(parent->nodes, paren) + 1;
         size_t ind = start;
         bool close_found = false;
         while (!close_found)
         {
-            if (ind >= expr->nodes->count)
+            if (ind >= parent->nodes->count)
             {
                 // we reached the end with no closing parenthesis
                 error_inval_expr err;
@@ -307,13 +307,13 @@ bool ast_replace_paren(expression *parent, expression *expr, error *e, file_cont
                 error_add_complex(e, &err, cont, STARY_OPENING_PARENTHESIS);
                 return false;
             }
-            expression_nodes *curr = (expression_nodes *)vec_at(expr->nodes, ind);
+            expression_nodes *curr = (expression_nodes *)vec_at(parent->nodes, ind);
             switch (curr->type)
             {
             case OPEN_PAREN:
             {
                 expression sub;
-                vec_subvec(expr->nodes, sub.nodes, ind);
+                vec_subvec(parent->nodes, sub.nodes, ind);
                 if (!ast_replace_paren(parent, &sub, e, cont))
                     return false;
                 // after that call the current pointer now points to the new sub expression
@@ -324,13 +324,13 @@ bool ast_replace_paren(expression *parent, expression *expr, error *e, file_cont
             {
                 size_t end = ind;
                 expression_nodes sub;
-                sub.sub_expr = vec_create_sub(parent->nodes, start + 1, end - 1);
+                sub.sub_expr = vec_create_sub(parent->nodes, start, end - 1);
                 if (!sub.sub_expr)
                     return false;
                 sub.type = SUB_EXPR;
                 sub.offst = paren->offst;
                 sub.offed = curr->offed;
-                vec_remove(parent->nodes, start, end, &sub);
+                vec_remove(parent->nodes, start - 1, end, &sub);
                 close_found = true;
                 break;
             }
@@ -338,5 +338,15 @@ bool ast_replace_paren(expression *parent, expression *expr, error *e, file_cont
             ind++;
         }
     }
+    if ((paren = ast_find_node(expr, CLOSE_PAREN)))
+    {
+        error_inval_expr err;
+        err.err_off_st = paren->offst;
+        err.err_off_ed = paren->offed;
+        err.expr = parent;
+        error_add_complex(e, &err, cont, STRAY_CLOSING_PARENTHESIS);
+        return false;
+    }
+
     return true;
 }

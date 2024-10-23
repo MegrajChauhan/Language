@@ -1,5 +1,47 @@
 #include "error.h"
 
+static void __ast_print__(error_inval_expr *err, char *i)
+{
+    fprintf(stderr, "LINE:\n\t");
+    size_t X = 0;
+    node *parent = err->expr->parent;
+    expression_nodes *first = (expression_nodes *)vec_at(err->expr->nodes, 0);
+    expression_nodes *last = (expression_nodes *)vec_at(err->expr->nodes, err->expr->nodes->count - 1);
+    size_t node_pos = err->err_off_st - parent->o_st;
+    size_t expr_start = first->offst - parent->o_st;
+    size_t node_pos_len = err->err_off_ed - parent->o_st;
+    size_t expr_end = last->offed - parent->o_st;
+    size_t count = parent->l_st;
+    while (true)
+    {
+        size_t len = 0;
+        while (*i != '\n' && *i != 0)
+        {
+            putc(*i, stderr);
+            i++;
+            len++;
+        }
+        putc('\n', stderr);
+        putc('\t', stderr);
+        for (size_t x = 0; x < len; X++, x++)
+        {
+            if ((X >= expr_start && X < node_pos) || (X >= node_pos_len && X < expr_end))
+                putc('~', stderr);
+            else if (X >= node_pos && X < node_pos_len)
+                putc('^', stderr);
+            else
+                putc(' ', stderr);
+        }
+        if (count == parent->l_ed)
+            break;
+        putc('\n', stderr);
+        putc('\t', stderr);
+        count++;
+        i++;
+    }
+    putc('\n', stderr);
+}
+
 error *error_init()
 {
     error *e = malloc(sizeof(error));
@@ -28,6 +70,9 @@ size_t get_err_len(uint64_t kind)
     case INVALID_TYPE_EXPR:
         return sizeof(error_inval_type_expr);
     case INVALID_EXPR:
+    case UNARY_OPER_MULTIPLE_OPERAND:
+    case STRAY_CLOSING_PARENTHESIS:
+    case STARY_OPENING_PARENTHESIS:
         return sizeof(error_inval_expr);
     }
     return 0;
@@ -118,6 +163,18 @@ void error_evaluate(error *e)
         case INVALID_EXPR:
             fatal = true;
             __invalid_expr(ent);
+            break;
+    case UNARY_OPER_MULTIPLE_OPERAND:
+            fatal = true;
+            __unary_oper_multiple_operand(ent);
+            break;
+    case STRAY_CLOSING_PARENTHESIS:
+            fatal = true;
+            __stray_closing_paren(ent);
+            break;
+    case STARY_OPENING_PARENTHESIS:
+            fatal = true;
+            __stray_opening_paren(ent);
             break;
         }
     }
@@ -253,7 +310,7 @@ void __invalid_type_expr(error_entry *e)
     error_inval_type_expr *err = e->err;
     char err_type[err->_the_node_->offe - err->_the_node_->off + 1];
     memcpy(err_type, e->error_context->entry.stream + err->_the_node_->off, sizeof(err_type) - 1);
-    err_type[sizeof(err_type)] = 0;
+    err_type[sizeof(err_type) - 1] = 0;
     fprintf(stderr, "%s:%lu:%lu: Invalid type expression encountered. Expected a valid type in the expression. Unexpected '%s'.\n", e->error_context->entry.fname, err->n->l_st, err->_the_node_->col, err_type);
     fprintf(stderr, "LINE:\n\t");
     char *i = e->error_context->entry.stream + err->n->o_st;
@@ -334,45 +391,39 @@ void __invalid_expr(error_entry *e)
     error_inval_expr *err = e->err;
     char err_node[err->err_off_ed - err->err_off_st + 1];
     memcpy(err_node, e->error_context->entry.stream + err->err_off_st, sizeof(err_node) - 1);
-    err_node[sizeof(err_node)] = 0;
+    err_node[sizeof(err_node) - 1] = 0;
     node *parent = err->expr->parent;
     fprintf(stderr, "%s:%lu:%lu: Invalid expression found. Unexpected '%s' in the expression.\n", e->error_context->entry.fname, parent->l_st, parent->c_st, err_node);
-    fprintf(stderr, "LINE:\n\t");
     char *i = e->error_context->entry.stream + (parent->o_st);
-    size_t X = 0;
-    expression_nodes *first = (expression_nodes *)vec_at(err->expr->nodes, 0);
-    expression_nodes *last = (expression_nodes *)vec_at(err->expr->nodes, err->expr->nodes->count - 1);
-    size_t node_pos = err->err_off_st - parent->o_st;
-    size_t expr_start = first->offst - parent->o_st;
-    size_t node_pos_len = err->err_off_ed - parent->o_st;
-    size_t expr_end = last->offed - parent->o_st;
-    size_t count = parent->l_st;
-    while (true)
-    {
-        size_t len = 0;
-        while (*i != '\n' && *i != 0)
-        {
-            putc(*i, stderr);
-            i++;
-            len++;
-        }
-        putc('\n', stderr);
-        putc('\t', stderr);
-        for (size_t x = 0; x < len; X++, x++)
-        {
-            if ((X >= expr_start && X < node_pos) || (X >= node_pos_len && X < expr_end))
-                putc('~', stderr);
-            else if (X >= node_pos && X < node_pos_len)
-                putc('^', stderr);
-            else
-                putc(' ', stderr);
-        }
-        if (count == parent->l_ed)
-            break;
-        putc('\n', stderr);
-        putc('\t', stderr);
-        count++;
-        i++;
-    }
-    putc('\n', stderr);
+    __ast_print__(err, i);
+}
+
+void __unary_oper_multiple_operand(error_entry *e)
+{
+    error_inval_expr *err = e->err;
+    char err_node[err->err_off_ed - err->err_off_st + 1];
+    memcpy(err_node, e->error_context->entry.stream + err->err_off_st, sizeof(err_node) - 1);
+    err_node[sizeof(err_node) - 1] = 0;
+    node *parent = err->expr->parent;
+    fprintf(stderr, "%s:%lu:%lu: Unary operator '%s' cannot have multiple operands.\n", e->error_context->entry.fname, parent->l_st, parent->c_st, err_node);
+    char *i = e->error_context->entry.stream + (parent->o_st);
+    __ast_print__(err, i);
+}
+
+void __stray_closing_paren(error_entry *e)
+{
+    error_inval_expr *err = e->err;
+    node *parent = err->expr->parent;
+    fprintf(stderr, "%s:%lu:%lu: Stray closing parenthesis without any corresponding opening parenthesis.\n", e->error_context->entry.fname, parent->l_st, parent->c_st);
+    char *i = e->error_context->entry.stream + (parent->o_st);
+    __ast_print__(err, i);
+}
+
+void __stray_opening_paren(error_entry *e)
+{
+    error_inval_expr *err = e->err;
+    node *parent = err->expr->parent;
+    fprintf(stderr, "%s:%lu:%lu: Stray opening parenthesis without any corresponding closing parenthesis.\n", e->error_context->entry.fname, parent->l_st, parent->c_st);
+    char *i = e->error_context->entry.stream + (parent->o_st);
+    __ast_print__(err, i);
 }
