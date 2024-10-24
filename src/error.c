@@ -73,6 +73,8 @@ size_t get_err_len(uint64_t kind)
     case UNARY_OPER_MULTIPLE_OPERAND:
     case STRAY_CLOSING_PARENTHESIS:
     case STARY_OPENING_PARENTHESIS:
+    case STRAY_CLOSE_BIGBRAC:
+    case STRAY_OPEN_BIGBRAC:
         return sizeof(error_inval_expr);
     }
     return 0;
@@ -164,17 +166,16 @@ void error_evaluate(error *e)
             fatal = true;
             __invalid_expr(ent);
             break;
-    case UNARY_OPER_MULTIPLE_OPERAND:
+        case UNARY_OPER_MULTIPLE_OPERAND:
             fatal = true;
             __unary_oper_multiple_operand(ent);
             break;
-    case STRAY_CLOSING_PARENTHESIS:
+        case STRAY_CLOSING_PARENTHESIS:
+        case STRAY_CLOSE_BIGBRAC:
+        case STARY_OPENING_PARENTHESIS:
+        case STRAY_OPEN_BIGBRAC:
             fatal = true;
-            __stray_closing_paren(ent);
-            break;
-    case STARY_OPENING_PARENTHESIS:
-            fatal = true;
-            __stray_opening_paren(ent);
+            __stray_opers(ent);
             break;
         }
     }
@@ -410,20 +411,25 @@ void __unary_oper_multiple_operand(error_entry *e)
     __ast_print__(err, i);
 }
 
-void __stray_closing_paren(error_entry *e)
+void __stray_opers(error_entry *e)
 {
     error_inval_expr *err = e->err;
     node *parent = err->expr->parent;
-    fprintf(stderr, "%s:%lu:%lu: Stray closing parenthesis without any corresponding opening parenthesis.\n", e->error_context->entry.fname, parent->l_st, parent->c_st);
-    char *i = e->error_context->entry.stream + (parent->o_st);
-    __ast_print__(err, i);
-}
-
-void __stray_opening_paren(error_entry *e)
-{
-    error_inval_expr *err = e->err;
-    node *parent = err->expr->parent;
-    fprintf(stderr, "%s:%lu:%lu: Stray opening parenthesis without any corresponding closing parenthesis.\n", e->error_context->entry.fname, parent->l_st, parent->c_st);
+    switch (e->kind)
+    {
+    case STRAY_OPEN_BIGBRAC:
+        fprintf(stderr, "%s:%lu:%lu: Stray opening brackets without any corresponding opening parenthesis.\n", e->error_context->entry.fname, parent->l_st, parent->c_st);
+        break;
+    case STARY_OPENING_PARENTHESIS:
+        fprintf(stderr, "%s:%lu:%lu: Stray opening parenthesis without any corresponding opening parenthesis.\n", e->error_context->entry.fname, parent->l_st, parent->c_st);
+        break;
+    case STRAY_CLOSING_PARENTHESIS:
+        fprintf(stderr, "%s:%lu:%lu: Stray closing parenthesis without any corresponding opening parenthesis.\n", e->error_context->entry.fname, parent->l_st, parent->c_st);
+        break;
+    case STRAY_CLOSE_BIGBRAC:
+        fprintf(stderr, "%s:%lu:%lu: Stray closing brackets without any corresponding opening parenthesis.\n", e->error_context->entry.fname, parent->l_st, parent->c_st);
+        break;
+    }
     char *i = e->error_context->entry.stream + (parent->o_st);
     __ast_print__(err, i);
 }

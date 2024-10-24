@@ -15,11 +15,13 @@ enum
 
 enum
 {
-    ARR_LENGTH,
+    ARR_LENGTH = 100,
     ARR_ASSIGNMENT,
     NORMAL_EXPR,
     STRING_ASSIGN,
     SUB_EXPR,
+    VAR_NAME,
+    ARRAY_INDEX,
 };
 
 typedef struct type type;

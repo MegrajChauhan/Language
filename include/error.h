@@ -34,6 +34,8 @@ enum
     UNARY_OPER_MULTIPLE_OPERAND,
     STRAY_CLOSING_PARENTHESIS,
     STARY_OPENING_PARENTHESIS,
+    STRAY_OPEN_BIGBRAC,
+    STRAY_CLOSE_BIGBRAC,
 };
 
 typedef struct error error;
@@ -122,8 +124,6 @@ void __redeclration(error_entry *e);
 
 void __unary_oper_multiple_operand(error_entry *e);
 
-void __stray_closing_paren(error_entry *e);
-
-void __stray_opening_paren(error_entry *e);
+void __stray_opers(error_entry *e);
 
 #endif
