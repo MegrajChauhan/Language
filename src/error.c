@@ -56,7 +56,7 @@ error *error_init()
     return e;
 }
 
-size_t get_err_len(uint64_t kind)
+size_t get_err_len(error_t kind)
 {
     switch (kind)
     {
@@ -81,7 +81,7 @@ size_t get_err_len(uint64_t kind)
     return 0;
 }
 
-void error_add(error *e, void *err, file_context *fcont, uint64_t kind, size_t els, size_t ele, size_t os, size_t oe, size_t cs, size_t ce)
+void error_add(error *e, void *err, file_context *fcont, error_t kind, size_t els, size_t ele, size_t os, size_t oe, size_t cs, size_t ce)
 {
     Assert(e != NULL);
     Assert(fcont != NULL);
@@ -114,7 +114,7 @@ void error_add(error *e, void *err, file_context *fcont, uint64_t kind, size_t e
     }
 }
 
-void error_add_complex(error *e, void *err, file_context *cont, uint64_t kind)
+void error_add_complex(error *e, void *err, file_context *cont, error_t kind)
 {
     error_add(e, err, cont, kind, 0, 0, 0, 0, 0, 0);
 }

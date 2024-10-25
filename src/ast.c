@@ -109,25 +109,37 @@ bool ast_is_binary_oper(expression *expr, expression_nodes *n)
         return false;
     expression_nodes *left = (expression_nodes *)vec_at(expr->nodes, ind - 1);
     expression_nodes *right = (expression_nodes *)vec_at(expr->nodes, ind + 1);
-    if (!ast_is_operator(left) || !ast_is_operator(right))
+    if (!ast_is_node_oper(left) || !ast_is_node_oper(right))
         return false;
     return true;
 }
 
-expression_nodes *ast_find_node_ref(expression *expr, uint64_t kind, uint64_t ref)
+expression_nodes *ast_find_node_ref(expression *expr, uint64_t kind, astnode_t type, uint64_t ref)
 {
-    for (size_t i = ref + 1; i < expr->nodes->count; i++)
+    if (type == OPER || type == SYM || type == DATA)
     {
-        expression_nodes *n = (expression_nodes *)vec_at(expr->nodes, i);
-        if (n->tok_type == kind)
-            return n;
+        for (size_t i = ref + 1; i < expr->nodes->count; i++)
+        {
+            expression_nodes *n = (expression_nodes *)vec_at(expr->nodes, i);
+            if (n->tok_type == kind)
+                return n;
+        }
+    }
+    else
+    {
+        for (size_t i = ref + 1; i < expr->nodes->count; i++)
+        {
+            expression_nodes *n = (expression_nodes *)vec_at(expr->nodes, i);
+            if (n->type == kind)
+                return n;
+        }
     }
     return NULL; // not found
 }
 
-expression_nodes *ast_find_node(expression *expr, uint64_t kind)
+expression_nodes *ast_find_node(expression *expr, uint64_t kind, astnode_t type)
 {
-    return ast_find_node_ref(expr, kind, (uint64_t)(-1));
+    return ast_find_node_ref(expr, kind, type, (uint64_t)(-1));
 }
 
 expression_nodes *ast_next_node(expression *expr, expression_nodes *ref)
@@ -147,82 +159,66 @@ ast_node *ast_get_root_node(expression *expr)
         return NULL;
     }
     expression_nodes *root = NULL;
-    new_node->kind = OPER;
     new_node->left = NULL;
     new_node->right = NULL;
-    if ((root = ast_find_node(expr, LOR)) != NULL)
+    if ((root = ast_find_node(expr, LOR, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, LAND)) != NULL)
+    else if ((root = ast_find_node(expr, LAND, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, OR)) != NULL)
+    else if ((root = ast_find_node(expr, OR, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, XOR)) != NULL)
+    else if ((root = ast_find_node(expr, XOR, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, AND)) != NULL)
+    else if ((root = ast_find_node(expr, AND, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, EQUALS)) != NULL)
+    else if ((root = ast_find_node(expr, EQUALS, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, NOT_EQUALS)) != NULL)
+    else if ((root = ast_find_node(expr, NOT_EQUALS, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, LESS_THAN)) != NULL)
+    else if ((root = ast_find_node(expr, LESS_THAN, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, LESS_EQ)) != NULL)
+    else if ((root = ast_find_node(expr, LESS_EQ, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, GREATER_THAN)) != NULL)
+    else if ((root = ast_find_node(expr, GREATER_THAN, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, GREATER_EQ)) != NULL)
+    else if ((root = ast_find_node(expr, GREATER_EQ, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, LSHIFT)) != NULL)
+    else if ((root = ast_find_node(expr, LSHIFT, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, RSHIFT)) != NULL)
+    else if ((root = ast_find_node(expr, RSHIFT, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, PLUS)) != NULL)
+    else if ((root = ast_find_node(expr, PLUS, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, MINUS)) != NULL)
+    else if ((root = ast_find_node(expr, MINUS, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, MUL)) != NULL)
+    else if ((root = ast_find_node(expr, MUL, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, DIV)) != NULL)
+    else if ((root = ast_find_node(expr, DIV, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, MOD)) != NULL)
+    else if ((root = ast_find_node(expr, MOD, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, NOT)) != NULL)
+    else if ((root = ast_find_node(expr, NOT, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, LNOT)) != NULL)
+    else if ((root = ast_find_node(expr, LNOT, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, UNARY_MINUS)) != NULL)
+    else if ((root = ast_find_node(expr, UNARY_MINUS, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, UNARY_PLUS)) != NULL)
+    else if ((root = ast_find_node(expr, UNARY_PLUS, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, INC)) != NULL)
+    else if ((root = ast_find_node(expr, INC, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, DEC)) != NULL)
+    else if ((root = ast_find_node(expr, DEC, OPER)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, NUM_INT)) != NULL)
-    {
-        new_node->kind = SIMPLE;
+    else if ((root = ast_find_node(expr, NUM_INT, DATA)) != NULL)
         new_node->n = root;
-    }
-    else if ((root = ast_find_node(expr, NUM_FLOAT)) != NULL)
-    {
-        new_node->kind = SIMPLE;
+    else if ((root = ast_find_node(expr, NUM_FLOAT, DATA)) != NULL)
         new_node->n = root;
-    }
-    else if ((root = ast_find_node(expr, VAR_NAME)) != NULL)
-    {
-        new_node->kind = IDEN;
+    else if ((root = ast_find_node(expr, VAR_NAME, DATA)) != NULL)
         new_node->n = root;
-    }
-    else if ((root = ast_find_node(expr, ARRAY_INDEX)) != NULL)
-    {
-        new_node->kind = ARRAY_INDEXING;
+    else if ((root = ast_find_node(expr, ARRAY_INDEX, ARRAY_INDEX)) != NULL)
         new_node->n = root;
-    }
-    else if ((root = ast_find_node(expr, SUB_EXPR)) != NULL)
-    {
-        new_node->kind = CHILD_EXPR;
+    else if ((root = ast_find_node(expr, SUB_EXPR, SUB_EXPR)) != NULL)
         new_node->n = root;
-    }
     else
     {
         free(new_node);
@@ -235,22 +231,17 @@ ast_node *ast_handle_different_nodes(node *parent, ast_node *n, error *e, file_c
 {
     ast_node *res = n;
     expression_nodes *sub = n->n;
-    switch (n->kind)
+    expression* tmp;
+    switch (sub->type)
     {
-    case CHILD_EXPR:
+    case SUB_EXPR:
         ast_node_destroy(n);
-        expression tmp;
-
-        tmp.nodes = sub->sub_expr;
-        tmp.parent = parent;
-        res = ast_build_tree(sub->sub_expr, sub->sub_expr, e, cont);
+        tmp = &sub->_array_indexing_.index;
+        res = ast_build_tree(tmp, tmp, e, cont);
         res->n = sub;
         break;
-    case ARRAY_INDEXING:
-        expression tmp;
-        tmp.nodes = sub->sub_expr;
-        tmp._type = sub->type;
-        tmp.parent = parent;
+    case ARRAY_INDEX:
+        tmp = &sub->_array_indexing_.index;
         ast *child_tree = ast_init();
         if (!child_tree)
         {
@@ -258,7 +249,7 @@ ast_node *ast_handle_different_nodes(node *parent, ast_node *n, error *e, file_c
             return NULL;
         }
         child_tree->kind = NORMAL_EXPR;
-        child_tree->root = ast_build_tree(&tmp, &tmp, e, cont);
+        child_tree->root = ast_build_tree(tmp, tmp, e, cont);
         if (!child_tree->root)
         {
             free(child_tree);
@@ -281,14 +272,11 @@ ast_node *ast_build_tree(expression *parent, expression *expr, error *e, file_co
         return NULL;
     }
 
-    if (root->kind == CHILD_EXPR)
+    if (root->n->type == SUB_EXPR)
     {
         expression_nodes *sub = root->n;
         free(root);
-        expression tmp;
-        tmp.nodes = sub->sub_expr;
-        tmp.parent = parent->parent;
-        tmp._type = parent->_type;
+        expression tmp = sub->_sub_expr_.sub_expr;
         root = ast_build_tree(&tmp, &tmp, e, fcont);
         if (!root)
             return false;
@@ -385,7 +373,7 @@ ast_node *ast_build_tree(expression *parent, expression *expr, error *e, file_co
 bool ast_replace_paren(expression *parent, expression *expr, error *e, file_context *cont)
 {
     expression_nodes *paren;
-    while ((paren = ast_find_node(expr, OPEN_PAREN)) != NULL)
+    while ((paren = ast_find_node(expr, OPEN_PAREN, OPER)) != NULL)
     {
         size_t start = vec_index_of(parent->nodes, paren) + 1;
         size_t ind = start;
@@ -419,12 +407,14 @@ bool ast_replace_paren(expression *parent, expression *expr, error *e, file_cont
             {
                 size_t end = ind;
                 expression_nodes sub;
-                sub.sub_expr = vec_create_sub(parent->nodes, start, end - 1);
-                if (!sub.sub_expr)
+                sub._sub_expr_.sub_expr.nodes = vec_create_sub(parent->nodes, start, end - 1);
+                if (!sub._sub_expr_.sub_expr.nodes)
                     return false;
                 sub.type = SUB_EXPR;
                 sub.offst = paren->offst;
                 sub.offed = curr->offed;
+                sub._sub_expr_.sub_expr.parent = parent->parent;
+                sub._sub_expr_.sub_expr._type = NORMAL_EXPR;
                 vec_remove(parent->nodes, start - 1, end, &sub);
                 close_found = true;
                 break;
@@ -433,7 +423,7 @@ bool ast_replace_paren(expression *parent, expression *expr, error *e, file_cont
             ind++;
         }
     }
-    if ((paren = ast_find_node(expr, CLOSE_PAREN)))
+    if ((paren = ast_find_node(expr, CLOSE_PAREN, OPER)))
     {
         error_inval_expr err;
         err.err_off_st = paren->offst;
@@ -450,7 +440,7 @@ bool ast_handle_possible_identifiers(expression *expr, error *e, file_context *c
 {
     // we will specifically handle identifiers here.
     expression_nodes *id;
-    id = ast_find_node(expr, IDENTIFIER);
+    id = ast_find_node(expr, IDENTIFIER, SYM);
     if (!id)
         return true;
     while (true)
@@ -460,11 +450,8 @@ bool ast_handle_possible_identifiers(expression *expr, error *e, file_context *c
         size_t ind = vec_index_of(expr->nodes, id);
         expression_nodes *nxt = ast_next_node(expr, id);
         if (!nxt)
-        {
             // this is it
-            id->type = VAR;
             break;
-        }
         if (nxt->tok_type == ACCESS_DOT)
         {
             // This will be useful with structs
@@ -505,11 +492,13 @@ bool ast_handle_possible_identifiers(expression *expr, error *e, file_context *c
                 internal_err();
                 return false;
             }
+            new._array_indexing_.index.parent = expr->parent;
+            new._array_indexing_.index._type = NORMAL_EXPR;
             vec_remove(expr->nodes, ind, vec_index_of(expr->nodes, curr), &new);
         }
-        id = ast_find_node_ref(expr, IDENTIFIER, ind);
+        id = ast_find_node_ref(expr, IDENTIFIER, SYM, ind);
     }
-    if ((id = ast_find_node_ref(expr, CLOSE_BIGBRAC, vec_index_of(expr->nodes, id))) != NULL)
+    if ((id = ast_find_node_ref(expr, CLOSE_BIGBRAC, OPER, vec_index_of(expr->nodes, id))) != NULL)
     {
         error_inval_expr err;
         err.err_off_st = id->offst;

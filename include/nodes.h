@@ -23,15 +23,13 @@ enum expr_t
     ARR_ASSIGNMENT,
     NORMAL_EXPR,
     STRING_ASSIGN,
-    SUB_EXPR,
     VAR_NAME,
-    ARRAY_INDEX,
 };
 
 enum exprnode_t
 {
     SUB_EXPR,
-    VAR,
+    SYM,
     DATA,
     ARRAY_INDEX,
     OPER,
@@ -51,6 +49,16 @@ struct node
     size_t l_st, l_ed;
     size_t c_st, c_ed;
     size_t o_st, o_ed;
+};
+
+struct expression
+{
+    vec *nodes;
+    expr_t _type; // could be any kind
+                    // an array assignment needs to be evaluated differently
+                    // than a regular expression
+    bool must_eval; // the expression must be evaluated at compile-time?
+    node *parent;
 };
 
 struct expression_nodes
@@ -73,19 +81,9 @@ struct expression_nodes
 
         struct
         {
-            expression *sub_expr;
+            expression sub_expr;
         } _sub_expr_;
     };
-};
-
-struct expression
-{
-    vec *nodes;
-    uint64_t _type; // could be any kind
-                    // an array assignment needs to be evaluated differently
-                    // than a regular expression
-    bool must_eval; // the expression must be evaluated at compile-time?
-    node *parent;
 };
 
 struct type

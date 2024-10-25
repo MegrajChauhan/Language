@@ -10,23 +10,12 @@
 
 typedef struct ast ast;
 typedef struct ast_node ast_node;
-typedef enum astnode_t astnode_t;
-
-enum astnode_t
-{
-    SIMPLE, // the ast node is a simple value
-    OPER,
-    ARRAY_INDEXING,
-    AST,  // the node itself is another AST
-    IDEN, // The node is a variable
-    CHILD_EXPR,
-};
+typedef enum exprnode_t astnode_t;
 
 struct ast_node
 {
     ast_node *left;
     ast_node *right;
-    astnode_t kind;
     expression_nodes *n;
     ast *child;
 };
@@ -55,9 +44,9 @@ void ast_report(expression *expr, expression_nodes *err_node, error *e, file_con
 
 bool ast_is_binary_oper(expression *expr, expression_nodes *n);
 
-expression_nodes *ast_find_node(expression *expr, uint64_t kind);
+expression_nodes *ast_find_node(expression *expr, uint64_t kind, astnode_t type);
 
-expression_nodes *ast_find_node_ref(expression *expr, uint64_t kind, uint64_t ref);
+expression_nodes *ast_find_node_ref(expression *expr, uint64_t kind, astnode_t type, uint64_t ref);
 
 expression_nodes *ast_next_node(expression *expr, expression_nodes *ref);
 
