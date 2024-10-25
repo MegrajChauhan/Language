@@ -100,7 +100,7 @@ bool parse_add_expression(parser *p, expression *expr, uint64_t until)
         n.tok_type = tok.kind;
         if (tok.kind >= COLON && tok.kind <= LESS_EQ)
             n.type = OPER;
-        else if (tok.kind == STR || tok.kind == NUM_FLOAT || tok.kind == NUM_INT)
+        else if (tok.kind == STR || tok.kind == NUM_FLOAT || tok.kind == NUM_INT || tok.kind == FALSE || tok.kind == TRUE)
             n.type = DATA;
         else if (tok.kind == IDENTIFIER)
             n.type = VAR;
@@ -121,6 +121,13 @@ bool parse_add_expression(parser *p, expression *expr, uint64_t until)
         }
         if (!str)
             lexer_next_token(p->lex, &tok);
+    }
+    if (expr->nodes->count == 0)
+    {
+        error_unexp_tok err;
+        err.got = tok.value;
+        error_add(p->err, &err, p->lex->context, UNEXPECTED_TOKEN_EXPR, tok.line, tok.line, tok.offset, tok.offset + (tok.value._e - tok.value._s), tok.col, tok.col + (tok.value._e - tok.value._s));
+        return false;
     }
     if (!vec_crunch(expr->nodes))
     {

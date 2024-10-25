@@ -62,6 +62,11 @@ var i: u16 = test[12 * 32 - x];
 var j = xyz[pqr[12] * mno[abc[b * (c - 12)] / 23 ] & count] / (12 + 17)* 2;
 
 var k = (12 + 3 * 4) / 2;
+@
+   \
+  / \
+  
+@
 
 var l = (2 + 3 * (4 - 5); // error, missing closing parentheses
 
@@ -69,7 +74,7 @@ var m = arr1[arr2[4 * 2] + arr3[(5 + 1) * 3]];
 
 var n = 5 | (2 & 3) ^ 7;
 
-var o:  u8[2 * (3 - 4) = {12,34}; // error
+// var o:  u8[2 * (3 - 4) = {12,34}; // error
 
 var p = 12 + (a * 15) / 4;
 
@@ -107,6 +112,8 @@ var af: u8 = ~4;
 
 var ag: bool = (a > 2) && ((b < 5) || (c == d));
 
-var ah: u8 = 12 //; // error
+// var ah: u8 = 12 //; // error
 
 var ai: bool = ((5 * 2) - 3) >= (10 / 2 + 1); // error
+
+// var aj = ; // error

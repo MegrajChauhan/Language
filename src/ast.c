@@ -14,7 +14,7 @@ static void ast_node_destroy(ast_node *n)
 
 static bool ast_is_node_simple(expression_nodes *n)
 {
-    switch (n->type)
+    switch (n->tok_type)
     {
     case NUM_INT:
     case NUM_FLOAT:
@@ -32,7 +32,7 @@ static bool ast_is_node_oper(expression_nodes *n)
 
 static bool ast_is_node_unary_oper(expression_nodes *n)
 {
-    switch (n->type)
+    switch (n->tok_type)
     {
     case UNARY_MINUS:
     case UNARY_PLUS:
@@ -213,7 +213,7 @@ ast_node *ast_get_root_node(expression *expr)
         new_node->n = root;
     else if ((root = ast_find_node(expr, NUM_FLOAT, DATA)) != NULL)
         new_node->n = root;
-    else if ((root = ast_find_node(expr, VAR_NAME, DATA)) != NULL)
+    else if ((root = ast_find_node(expr, IDENTIFIER, SYM)) != NULL)
         new_node->n = root;
     else if ((root = ast_find_node(expr, ARRAY_INDEX, ARRAY_INDEX)) != NULL)
         new_node->n = root;
@@ -231,14 +231,13 @@ ast_node *ast_handle_different_nodes(node *parent, ast_node *n, error *e, file_c
 {
     ast_node *res = n;
     expression_nodes *sub = n->n;
-    expression* tmp;
+    expression *tmp;
     switch (sub->type)
     {
     case SUB_EXPR:
         ast_node_destroy(n);
-        tmp = &sub->_array_indexing_.index;
+        tmp = &sub->_sub_expr_.sub_expr;
         res = ast_build_tree(tmp, tmp, e, cont);
-        res->n = sub;
         break;
     case ARRAY_INDEX:
         tmp = &sub->_array_indexing_.index;
@@ -272,17 +271,10 @@ ast_node *ast_build_tree(expression *parent, expression *expr, error *e, file_co
         return NULL;
     }
 
-    if (root->n->type == SUB_EXPR)
-    {
-        expression_nodes *sub = root->n;
-        free(root);
-        expression tmp = sub->_sub_expr_.sub_expr;
-        root = ast_build_tree(&tmp, &tmp, e, fcont);
-        if (!root)
-            return false;
-        return root; // done right here
-    }
-
+    if ((root = ast_handle_different_nodes(parent->parent, root, e, fcont)) == NULL)
+        return NULL;
+    if (expr->nodes->count == 1)
+        return root;
     size_t ind = vec_index_of(expr->nodes, root->n);
 
     // Now the nodes may be just an array indexing
@@ -307,7 +299,7 @@ ast_node *ast_build_tree(expression *parent, expression *expr, error *e, file_co
         // pretty much all unary operators only expect operands on the right side
         bool _register_err_ = false;
         expression *_fault_ = NULL;
-        if (root->n->type == INC || root->n->type == DEC)
+        if (root->n->tok_type == INC || root->n->tok_type == DEC)
         {
             if (right.nodes->count > 0)
             {
@@ -372,10 +364,12 @@ ast_node *ast_build_tree(expression *parent, expression *expr, error *e, file_co
 
 bool ast_replace_paren(expression *parent, expression *expr, error *e, file_context *cont)
 {
-    expression_nodes *paren;
-    while ((paren = ast_find_node(expr, OPEN_PAREN, OPER)) != NULL)
+    /// TODO: Found the Stack Smasher, solve this tomorrow
+    expression_nodes *paren = ast_find_node(expr, OPEN_PAREN, OPER);
+    size_t start = vec_index_of(parent->nodes, paren);
+    while ((paren = ast_find_node_ref(parent, OPEN_PAREN, OPER, start)) != NULL)
     {
-        size_t start = vec_index_of(parent->nodes, paren) + 1;
+        start = vec_index_of(parent->nodes, paren) + 1;
         size_t ind = start;
         bool close_found = false;
         while (!close_found)
@@ -391,12 +385,12 @@ bool ast_replace_paren(expression *parent, expression *expr, error *e, file_cont
                 return false;
             }
             expression_nodes *curr = (expression_nodes *)vec_at(parent->nodes, ind);
-            switch (curr->type)
+            switch (curr->tok_type)
             {
             case OPEN_PAREN:
             {
                 expression sub;
-                vec_subvec(parent->nodes, sub.nodes, ind);
+                vec_subvec(parent->nodes, sub.nodes, ind - 1);
                 if (!ast_replace_paren(parent, &sub, e, cont))
                     return false;
                 // after that call the current pointer now points to the new sub expression
@@ -423,7 +417,7 @@ bool ast_replace_paren(expression *parent, expression *expr, error *e, file_cont
             ind++;
         }
     }
-    if ((paren = ast_find_node(expr, CLOSE_PAREN, OPER)))
+    if ((paren = ast_find_node_ref(parent, CLOSE_PAREN, OPER, start - 1)) != NULL)
     {
         error_inval_expr err;
         err.err_off_st = paren->offst;

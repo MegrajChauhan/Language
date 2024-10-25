@@ -37,8 +37,9 @@ bool variable_declaration(namespace *ns, node *n, error *e)
     }
     // It hasn't been declared before.
     // We need to validate the type first
-    if (!analyse_type(ns, n, vd->_t, e))
-        return false;
+    if (vd->_t)
+        if (!analyse_type(ns, n, vd->_t, e))
+            return false;
 
     // evaluate the assigned expression
     ast *test = ast_init();
