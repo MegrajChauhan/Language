@@ -64,6 +64,7 @@ size_t get_err_len(uint64_t kind)
     case UNEXPECTED_EOL:
     case UNEXPECTED_TOKEN:
     case UNEXPECTED_TOKEN_TYPE:
+    case UNEXPECTED_TOKEN_EXPR:
         return sizeof(error_unexp_tok);
     case REDECLARATION:
         return sizeof(error_redeclr);
@@ -140,6 +141,10 @@ void error_evaluate(error *e)
         case UNEXPECTED_TOKEN_TYPE:
             fatal = true;
             __unexpected_token(ent, "u8, u16, u32, u64, i8, i16, i32, i64, f32, f64, [] or a user-defined type");
+            break;
+        case UNEXPECTED_TOKEN_EXPR:
+            fatal = true;
+            __unexpected_token(ent, "integer, floating-point value, or variables");
             break;
         case UNEXPECTED_EOL:
         case UNEXPECTED_EOF:

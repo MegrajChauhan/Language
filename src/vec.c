@@ -105,7 +105,7 @@ void vec_remove(vec *v, size_t ind_start, size_t upto, void *elem)
     void *dest = (char *)v->buf + ind_start * v->elen + ((elem) ? v->elen : 0);
     size_t removing = (upto - ind_start) + 1;
     size_t remaining = (v->count - upto - 1) * v->elen;
-    void *src = (char *)v->buf + remaining;
+    void *src = (char *)v->buf + (upto+1) * v->elen;
     memcpy(dest, src, remaining);
     if (elem)
     {

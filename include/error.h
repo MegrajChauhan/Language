@@ -14,13 +14,16 @@
 #define Assert(cond)
 #endif
 
+typedef enum error_t error_t;
+
 // Error kind(should give all the needed context)
-enum
+enum error_t
 {
     CANNOT_BUILD_TOKEN,
     DOUBLE_DOTS_FLOAT, // more than one '.' in a floating point number
 
     UNEXPECTED_TOKEN,
+    UNEXPECTED_TOKEN_EXPR,
     UNEXPECTED_TOKEN_TYPE, // expected type
     UNEXPECTED_EOF,
     UNEXPECTED_EOL, // unexpected end of line(primarily for strings)
@@ -48,7 +51,7 @@ typedef struct error_inval_expr error_inval_expr;
 struct error_entry
 {
     file_context *error_context; // the file where the error occured
-    uint64_t kind;               // kind of error(for context)
+    error_t kind;               // kind of error(for context)
 
     // in case of lexers, both endings and startings would be the same
     // but this extra info will be useful with parsers and semantic analysis
@@ -94,9 +97,9 @@ struct error
 
 error *error_init();
 
-void error_add(error *e, void *err, file_context *fcont, uint64_t kind, size_t els, size_t ele, size_t os, size_t oe, size_t cs, size_t ce);
+void error_add(error *e, void *err, file_context *fcont, error_t kind, size_t els, size_t ele, size_t os, size_t oe, size_t cs, size_t ce);
 
-void error_add_complex(error *e, void *err, file_context *cont, uint64_t kind);
+void error_add_complex(error *e, void *err, file_context *cont, error_t kind);
 
 void error_evaluate(error *e);
 
@@ -114,7 +117,7 @@ void __unexpected_token(error_entry *e, char *exp);
 
 void __inval_string(error_entry *e);
 
-size_t get_err_len(uint64_t kind);
+size_t get_err_len(error_t kind);
 
 void __invalid_type_expr(error_entry *e);
 

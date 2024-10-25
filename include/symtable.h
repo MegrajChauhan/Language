@@ -8,8 +8,9 @@
 
 typedef struct symtable_entry symtable_entry;
 typedef struct symtable symtable;
+typedef enum symentry_t symentry_t;
 
-enum
+enum symentry_t
 {
     _FUNCTION,
     _VARIABLE,
@@ -24,7 +25,7 @@ struct symtable_entry
     type *t; // Just take the one from the node
     void *ptr;
     bool _const; // is the entry a constant
-    uint64_t kind;
+    symentry_t kind;
     file_context *parent;
 };
 

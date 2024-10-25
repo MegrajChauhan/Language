@@ -10,8 +10,9 @@
 
 typedef struct ast ast;
 typedef struct ast_node ast_node;
+typedef enum astnode_t astnode_t;
 
-enum
+enum astnode_t
 {
     SIMPLE, // the ast node is a simple value
     OPER,
@@ -25,7 +26,7 @@ struct ast_node
 {
     ast_node *left;
     ast_node *right;
-    uint8_t kind;
+    astnode_t kind;
     expression_nodes *n;
     ast *child;
 };
@@ -33,7 +34,7 @@ struct ast_node
 struct ast
 {
     ast_node *root;
-    uint64_t kind; // inherit the expression's kind
+    expr_t kind; // inherit the expression's kind
 };
 
 // size_t get_precedence(uint64_t kind);
@@ -49,7 +50,6 @@ void ast_destroy(ast *tree);
 bool ast_array_length_expr(ast *tree, expression *expr, error *e, file_context *cont);
 
 // expression_nodes *ast_find_lowest_precedence(expression *expr);
-bool ast_is_operator(expression_nodes *n);
 
 void ast_report(expression *expr, expression_nodes *err_node, error *e, file_context *cont);
 
@@ -69,7 +69,7 @@ bool ast_replace_paren(expression *parent, expression *expr, error *e, file_cont
 
 bool ast_handle_possible_identifiers(expression *expr, error *e, file_context *cont);
 
-ast_node *ast_handle_different_nodes(ast_node *n, error *e, file_context *cont);
+ast_node *ast_handle_different_nodes(node *parent, ast_node *n, error *e, file_context *cont);
 
 // bool ast_form_node_binary(expression *expr, expression_nodes *oper, ast_node *new_node, error *err, file_context *cont);
 /*

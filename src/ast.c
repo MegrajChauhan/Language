@@ -27,7 +27,7 @@ static bool ast_is_node_simple(expression_nodes *n)
 static bool ast_is_node_oper(expression_nodes *n)
 {
     uint64_t temp;
-    return find_oper(&n->val, &temp);
+    return n->type == OPER;
 }
 
 static bool ast_is_node_unary_oper(expression_nodes *n)
@@ -43,11 +43,6 @@ static bool ast_is_node_unary_oper(expression_nodes *n)
         return true;
     }
     return false;
-}
-
-static void ast_print_tree(ast *tree)
-{
-    
 }
 
 ast *ast_init()
@@ -98,14 +93,6 @@ bool ast_array_length_expr(ast *tree, expression *expr, error *e, file_context *
     return (tree->root = ast_build_tree(expr, expr, e, cont)) != NULL;
 }
 
-bool ast_is_operator(expression_nodes *n)
-{
-    uint64_t temp = 0;
-    if (!find_oper(&n->val, &temp))
-        return false; // not an operator
-    return true;
-}
-
 void ast_report(expression *expr, expression_nodes *err_node, error *e, file_context *cont)
 {
     error_inval_expr err;
@@ -132,7 +119,7 @@ expression_nodes *ast_find_node_ref(expression *expr, uint64_t kind, uint64_t re
     for (size_t i = ref + 1; i < expr->nodes->count; i++)
     {
         expression_nodes *n = (expression_nodes *)vec_at(expr->nodes, i);
-        if (n->type == kind)
+        if (n->tok_type == kind)
             return n;
     }
     return NULL; // not found
@@ -163,11 +150,27 @@ ast_node *ast_get_root_node(expression *expr)
     new_node->kind = OPER;
     new_node->left = NULL;
     new_node->right = NULL;
-    if ((root = ast_find_node(expr, OR)) != NULL)
+    if ((root = ast_find_node(expr, LOR)) != NULL)
+        new_node->n = root;
+    else if ((root = ast_find_node(expr, LAND)) != NULL)
+        new_node->n = root;
+    else if ((root = ast_find_node(expr, OR)) != NULL)
         new_node->n = root;
     else if ((root = ast_find_node(expr, XOR)) != NULL)
         new_node->n = root;
     else if ((root = ast_find_node(expr, AND)) != NULL)
+        new_node->n = root;
+    else if ((root = ast_find_node(expr, EQUALS)) != NULL)
+        new_node->n = root;
+    else if ((root = ast_find_node(expr, NOT_EQUALS)) != NULL)
+        new_node->n = root;
+    else if ((root = ast_find_node(expr, LESS_THAN)) != NULL)
+        new_node->n = root;
+    else if ((root = ast_find_node(expr, LESS_EQ)) != NULL)
+        new_node->n = root;
+    else if ((root = ast_find_node(expr, GREATER_THAN)) != NULL)
+        new_node->n = root;
+    else if ((root = ast_find_node(expr, GREATER_EQ)) != NULL)
         new_node->n = root;
     else if ((root = ast_find_node(expr, LSHIFT)) != NULL)
         new_node->n = root;
@@ -184,6 +187,8 @@ ast_node *ast_get_root_node(expression *expr)
     else if ((root = ast_find_node(expr, MOD)) != NULL)
         new_node->n = root;
     else if ((root = ast_find_node(expr, NOT)) != NULL)
+        new_node->n = root;
+    else if ((root = ast_find_node(expr, LNOT)) != NULL)
         new_node->n = root;
     else if ((root = ast_find_node(expr, UNARY_MINUS)) != NULL)
         new_node->n = root;
@@ -226,7 +231,7 @@ ast_node *ast_get_root_node(expression *expr)
     return new_node;
 }
 
-ast_node *ast_handle_different_nodes(ast_node *n, error *e, file_context *cont)
+ast_node *ast_handle_different_nodes(node *parent, ast_node *n, error *e, file_context *cont)
 {
     ast_node *res = n;
     expression_nodes *sub = n->n;
@@ -234,11 +239,18 @@ ast_node *ast_handle_different_nodes(ast_node *n, error *e, file_context *cont)
     {
     case CHILD_EXPR:
         ast_node_destroy(n);
+        expression tmp;
+
+        tmp.nodes = sub->sub_expr;
+        tmp.parent = parent;
         res = ast_build_tree(sub->sub_expr, sub->sub_expr, e, cont);
         res->n = sub;
         break;
     case ARRAY_INDEXING:
-        expression *child = sub->sub_expr;
+        expression tmp;
+        tmp.nodes = sub->sub_expr;
+        tmp._type = sub->type;
+        tmp.parent = parent;
         ast *child_tree = ast_init();
         if (!child_tree)
         {
@@ -246,7 +258,7 @@ ast_node *ast_handle_different_nodes(ast_node *n, error *e, file_context *cont)
             return NULL;
         }
         child_tree->kind = NORMAL_EXPR;
-        child_tree->root = ast_build_tree(child, child, e, cont);
+        child_tree->root = ast_build_tree(&tmp, &tmp, e, cont);
         if (!child_tree->root)
         {
             free(child_tree);
@@ -273,7 +285,11 @@ ast_node *ast_build_tree(expression *parent, expression *expr, error *e, file_co
     {
         expression_nodes *sub = root->n;
         free(root);
-        root = ast_build_tree(sub->sub_expr, sub->sub_expr, e, fcont);
+        expression tmp;
+        tmp.nodes = sub->sub_expr;
+        tmp.parent = parent->parent;
+        tmp._type = parent->_type;
+        root = ast_build_tree(&tmp, &tmp, e, fcont);
         if (!root)
             return false;
         return root; // done right here
@@ -337,8 +353,11 @@ ast_node *ast_build_tree(expression *parent, expression *expr, error *e, file_co
             free(root);
             return NULL;
         }
-        if (root->right->kind == CHILD_EXPR)
+        root->right = ast_handle_different_nodes(parent->parent, root->right, e, fcont);
+        if (!root->right)
         {
+            free(root);
+            return NULL;
         }
     }
     if (prevec.count > 0)
@@ -351,17 +370,13 @@ ast_node *ast_build_tree(expression *parent, expression *expr, error *e, file_co
             free(root);
             return NULL;
         }
-        if (root->left->kind == CHILD_EXPR)
+        root->left = ast_handle_different_nodes(parent->parent, root->left, e, fcont);
+        if (!root->left)
         {
-            expression_nodes *sub = root->left->n;
-            ast_node_destroy(root->left);
-            root->left = ast_build_tree(sub->sub_expr, sub->sub_expr, e, fcont);
-            if (!root->left)
-            {
-                ast_node_destroy(root->left);
+            if (subvec.count > 0)
                 ast_node_destroy(root->right);
-                return false;
-            }
+            free(root);
+            return NULL;
         }
     }
     return root;
@@ -447,28 +462,28 @@ bool ast_handle_possible_identifiers(expression *expr, error *e, file_context *c
         if (!nxt)
         {
             // this is it
-            id->type = VAR_NAME;
+            id->type = VAR;
             break;
         }
-        if (nxt->type == ACCESS_DOT)
+        if (nxt->tok_type == ACCESS_DOT)
         {
             // This will be useful with structs
             // But we don't have that yet
         }
-        else if (nxt->type == OPEN_BIGBRAC)
+        else if (nxt->tok_type == OPEN_BIGBRAC)
         {
             // an array indexing
             size_t count = 1;
-            expression_nodes *curr = ast_next_node(expr, nxt);
+            expression_nodes *curr = nxt;
             while (count != 0)
             {
+                curr = ast_next_node(expr, curr);
                 if (!curr)
                     break;
-                if (curr->type == OPEN_BIGBRAC)
+                if (curr->tok_type == OPEN_BIGBRAC)
                     count++;
-                else if (curr->type == CLOSE_BIGBRAC)
+                else if (curr->tok_type == CLOSE_BIGBRAC)
                     count--;
-                curr = ast_next_node(expr, curr);
             }
             if (count != 0)
             {
@@ -482,19 +497,19 @@ bool ast_handle_possible_identifiers(expression *expr, error *e, file_context *c
             expression_nodes new;
             new.offed = curr->offed;
             new.offst = id->offst;
-            new.sub_expr = vec_create_sub(expr->nodes, ind + 1, vec_index_of(expr->nodes, curr) - 1);
             new.type = ARRAY_INDEX;
-            new.val = id->val;
-            if (!new.sub_expr)
+            new._array_indexing_.array_name = id->_var_or_value_or_oper_.name_or_value_or_oper;
+            new._array_indexing_.index.nodes = vec_create_sub(expr->nodes, ind + 1, vec_index_of(expr->nodes, curr) - 1);
+            if (!new._array_indexing_.index.nodes)
             {
                 internal_err();
                 return false;
             }
             vec_remove(expr->nodes, ind, vec_index_of(expr->nodes, curr), &new);
         }
-        id = ast_find_node(expr, IDENTIFIER);
+        id = ast_find_node_ref(expr, IDENTIFIER, ind);
     }
-    if ((id = ast_find_node_ref(expr, CLOSE_BIGBRAC, id)) != NULL)
+    if ((id = ast_find_node_ref(expr, CLOSE_BIGBRAC, vec_index_of(expr->nodes, id))) != NULL)
     {
         error_inval_expr err;
         err.err_off_st = id->offst;

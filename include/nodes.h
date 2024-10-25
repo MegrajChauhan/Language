@@ -8,20 +8,33 @@
 #include "vec.h"
 #include "defs.h"
 
-enum
+typedef enum exprnode_t exprnode_t;
+typedef enum node_t node_t;
+typedef enum expr_t expr_t;
+
+enum node_t
 {
     VAR_DECLR,
 };
 
-enum
+enum expr_t
 {
-    ARR_LENGTH = 100,
+    ARR_LENGTH,
     ARR_ASSIGNMENT,
     NORMAL_EXPR,
     STRING_ASSIGN,
     SUB_EXPR,
     VAR_NAME,
     ARRAY_INDEX,
+};
+
+enum exprnode_t
+{
+    SUB_EXPR,
+    VAR,
+    DATA,
+    ARRAY_INDEX,
+    OPER,
 };
 
 typedef struct type type;
@@ -33,7 +46,7 @@ typedef struct node_var_declr node_var_declr;
 
 struct node
 {
-    uint64_t kind;
+    node_t kind;
     void *_node;
     size_t l_st, l_ed;
     size_t c_st, c_ed;
@@ -42,15 +55,26 @@ struct node
 
 struct expression_nodes
 {
-    uint64_t type;
+    exprnode_t type;
+    uint64_t tok_type;
+    size_t offst, offed;
     union
     {
         struct
         {
-            slice val;
-            size_t offst, offed;
-        };
-        void *sub_expr;
+            slice name_or_value_or_oper;
+        } _var_or_value_or_oper_;
+
+        struct
+        {
+            slice array_name;
+            expression index;
+        } _array_indexing_;
+
+        struct
+        {
+            expression *sub_expr;
+        } _sub_expr_;
     };
 };
 

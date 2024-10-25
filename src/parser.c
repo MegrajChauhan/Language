@@ -87,16 +87,31 @@ bool parse_add_expression(parser *p, expression *expr, uint64_t until)
             // check if unary
             expression_nodes *prev = (expression_nodes *)vec_at(expr->nodes, expr->nodes->count - 1);
             uint64_t temp;
-            if (find_oper(&prev->val, &temp) || expr->nodes->count == 0)
-                // so unary
-                tok.kind = tok.kind - 1;
+            if (prev->type == OPER)
+            {
+                if (find_oper(&prev->_var_or_value_or_oper_.name_or_value_or_oper, &temp) || expr->nodes->count == 0)
+                    // so unary
+                    tok.kind = tok.kind - 1;
+            }
             break;
         }
         }
         expression_nodes n;
-        n.type = tok.kind;
-        n.val._s = tok.value._s;
-        n.val._e = tok.value._e;
+        n.tok_type = tok.kind;
+        if (tok.kind >= COLON && tok.kind <= LESS_EQ)
+            n.type = OPER;
+        else if (tok.kind == STR || tok.kind == NUM_FLOAT || tok.kind == NUM_INT)
+            n.type = DATA;
+        else if (tok.kind == IDENTIFIER)
+            n.type = VAR;
+        else
+        {
+            error_unexp_tok err;
+            err.got = tok.value;
+            error_add(p->err, &err, p->lex->context, UNEXPECTED_TOKEN_EXPR, tok.line, tok.line, tok.offset, tok.offset + (tok.value._e - tok.value._s), tok.col, tok.col + (tok.value._e - tok.value._s));
+            return false;
+        }
+        n._var_or_value_or_oper_.name_or_value_or_oper = tok.value;
         n.offst = tok.offset;
         n.offed = tok.offset + (tok.value._e - tok.value._s);
         if (!vec_push(expr->nodes, &n))
