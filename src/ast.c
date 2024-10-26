@@ -88,7 +88,7 @@ bool ast_array_length_expr(ast *tree, expression *expr, error *e, file_context *
     // bool must_eval = true;
     if (!ast_handle_possible_identifiers(expr, e, cont))
         return false;
-    if (!ast_replace_paren(expr, expr, e, cont, false))
+    if (!ast_replace_paren(expr, expr, e, cont, true))
         return false;
     return (tree->root = ast_build_tree(expr, expr, e, cont)) != NULL;
 }
@@ -212,6 +212,10 @@ ast_node *ast_get_root_node(expression *expr)
     else if ((root = ast_find_node(expr, NUM_INT, DATA)) != NULL)
         new_node->n = root;
     else if ((root = ast_find_node(expr, NUM_FLOAT, DATA)) != NULL)
+        new_node->n = root;
+    else if ((root = ast_find_node(expr, TRUE, DATA)) != NULL)
+        new_node->n = root;
+    else if ((root = ast_find_node(expr, FALSE, DATA)) != NULL)
         new_node->n = root;
     else if ((root = ast_find_node(expr, IDENTIFIER, SYM)) != NULL)
         new_node->n = root;
@@ -367,12 +371,13 @@ ast_node *ast_build_tree(expression *parent, expression *expr, error *e, file_co
 
 bool ast_replace_paren(expression *parent, expression *expr, error *e, file_context *cont, bool _root_)
 {
-    /// TODO: Found the Stack Smasher, solve this tomorrow
     expression_nodes *paren = ast_find_node(expr, OPEN_PAREN, OPER);
+    if (!_root_)
+        paren = vec_at(parent->nodes, vec_index_of(parent->nodes, vec_at(expr->nodes, 0)) - 1);
     size_t start = 0;
     while (true)
     {
-        if (!paren && !_root_)
+        if (!paren)
             break;
         start = vec_index_of(parent->nodes, paren) + 1;
         size_t ind = start;
@@ -382,8 +387,8 @@ bool ast_replace_paren(expression *parent, expression *expr, error *e, file_cont
             if (ind >= parent->nodes->count)
             {
                 // we reached the end with no closing parenthesis
-                if (!paren)
-                    paren = vec_at(expr->nodes, expr->nodes->count - 1);
+                // if (!paren)
+                //     paren = vec_at(expr->nodes, expr->nodes->count - 1);
                 error_inval_expr err;
                 err.err_off_st = paren->offst;
                 err.err_off_ed = paren->offed;
@@ -400,7 +405,7 @@ bool ast_replace_paren(expression *parent, expression *expr, error *e, file_cont
                 vec temp;
                 vec_subvec(parent->nodes, &temp, ind);
                 sub.nodes = &temp;
-                if (!ast_replace_paren(parent, &sub, e, cont, true))
+                if (!ast_replace_paren(parent, &sub, e, cont, false))
                     return false;
                 // after that call the current pointer now points to the new sub expression
                 // ind += ((expression *)paren->sub_expr)->nodes->count + 1;
@@ -427,7 +432,7 @@ bool ast_replace_paren(expression *parent, expression *expr, error *e, file_cont
         }
         paren = ast_find_node_ref(parent, OPEN_PAREN, OPER, start - 1);
     }
-    if ((paren = ast_find_node_ref(parent, CLOSE_PAREN, OPER, start - 1)) != NULL)
+    if ((paren = ast_find_node_ref(parent, CLOSE_PAREN, OPER, start - 1)) != NULL && _root_)
     {
         error_inval_expr err;
         err.err_off_st = paren->offst;
@@ -500,7 +505,7 @@ bool ast_handle_possible_identifiers(expression *expr, error *e, file_context *c
             new._array_indexing_.index.parent = expr->parent;
             new._array_indexing_.index._type = NORMAL_EXPR;
             vec_remove(expr->nodes, ind, vec_index_of(expr->nodes, nxt), &new);
-            if (!ast_replace_paren(expr, &new._array_indexing_.index, e, cont, false))
+            if (!ast_replace_paren(&new._array_indexing_.index, &new._array_indexing_.index, e, cont, true))
                 return false;
             if (!ast_handle_possible_identifiers(&new._array_indexing_.index, e, cont))
                 return false;
