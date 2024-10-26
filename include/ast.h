@@ -54,11 +54,11 @@ ast_node *ast_get_root_node(expression *expr);
 
 ast_node *ast_build_tree(expression *parent, expression *expr, error *e, file_context *fcont);
 
-bool ast_replace_paren(expression *parent, expression *expr, error *e, file_context *cont);
+bool ast_replace_paren(expression *parent, expression *expr, error *e, file_context *cont, bool _root_);
 
 bool ast_handle_possible_identifiers(expression *expr, error *e, file_context *cont);
 
-ast_node *ast_handle_different_nodes(node *parent, ast_node *n, error *e, file_context *cont);
+ast_node *ast_handle_different_nodes(expression *parent, ast_node *n, error *e, file_context *cont);
 
 // bool ast_form_node_binary(expression *expr, expression_nodes *oper, ast_node *new_node, error *err, file_context *cont);
 /*

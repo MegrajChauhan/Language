@@ -87,7 +87,7 @@ bool parse_add_expression(parser *p, expression *expr, uint64_t until)
             // check if unary
             expression_nodes *prev = (expression_nodes *)vec_at(expr->nodes, expr->nodes->count - 1);
             uint64_t temp;
-            if (prev->type == OPER)
+            if (prev->type == OPER && !(prev->tok_type >= OPEN_PAREN && prev->tok_type <= CLOSE_BIGBRAC))
             {
                 if (find_oper(&prev->_var_or_value_or_oper_.name_or_value_or_oper, &temp) || expr->nodes->count == 0)
                     // so unary

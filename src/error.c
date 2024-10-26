@@ -411,7 +411,7 @@ void __unary_oper_multiple_operand(error_entry *e)
     memcpy(err_node, e->error_context->entry.stream + err->err_off_st, sizeof(err_node) - 1);
     err_node[sizeof(err_node) - 1] = 0;
     node *parent = err->expr->parent;
-    fprintf(stderr, "%s:%lu:%lu: Unary operator '%s' cannot have multiple operands.\n", e->error_context->entry.fname, parent->l_st, parent->c_st, err_node);
+    fprintf(stderr, "%s:%lu:%lu: Unary operator '%s' has invalid operands here.\n", e->error_context->entry.fname, parent->l_st, parent->c_st, err_node);
     char *i = e->error_context->entry.stream + (parent->o_st);
     __ast_print__(err, i);
 }
@@ -423,16 +423,16 @@ void __stray_opers(error_entry *e)
     switch (e->kind)
     {
     case STRAY_OPEN_BIGBRAC:
-        fprintf(stderr, "%s:%lu:%lu: Stray opening brackets without any corresponding opening parenthesis.\n", e->error_context->entry.fname, parent->l_st, parent->c_st);
+        fprintf(stderr, "%s:%lu:%lu: Stray opening brackets without any corresponding closing brackets.\n", e->error_context->entry.fname, parent->l_st, parent->c_st);
         break;
     case STARY_OPENING_PARENTHESIS:
-        fprintf(stderr, "%s:%lu:%lu: Stray opening parenthesis without any corresponding opening parenthesis.\n", e->error_context->entry.fname, parent->l_st, parent->c_st);
+        fprintf(stderr, "%s:%lu:%lu: Stray opening parenthesis without any corresponding closing parenthesis.\n", e->error_context->entry.fname, parent->l_st, parent->c_st);
         break;
     case STRAY_CLOSING_PARENTHESIS:
         fprintf(stderr, "%s:%lu:%lu: Stray closing parenthesis without any corresponding opening parenthesis.\n", e->error_context->entry.fname, parent->l_st, parent->c_st);
         break;
     case STRAY_CLOSE_BIGBRAC:
-        fprintf(stderr, "%s:%lu:%lu: Stray closing brackets without any corresponding opening parenthesis.\n", e->error_context->entry.fname, parent->l_st, parent->c_st);
+        fprintf(stderr, "%s:%lu:%lu: Stray closing brackets without any corresponding opening brackets.\n", e->error_context->entry.fname, parent->l_st, parent->c_st);
         break;
     }
     char *i = e->error_context->entry.stream + (parent->o_st);
