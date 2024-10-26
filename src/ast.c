@@ -366,9 +366,11 @@ bool ast_replace_paren(expression *parent, expression *expr, error *e, file_cont
 {
     /// TODO: Found the Stack Smasher, solve this tomorrow
     expression_nodes *paren = ast_find_node(expr, OPEN_PAREN, OPER);
-    size_t start = vec_index_of(parent->nodes, paren);
-    while ((paren = ast_find_node_ref(parent, OPEN_PAREN, OPER, start)) != NULL)
+    size_t start = 0;
+    while (true)
     {
+        if (!paren)
+            break;
         start = vec_index_of(parent->nodes, paren) + 1;
         size_t ind = start;
         bool close_found = false;
@@ -390,7 +392,9 @@ bool ast_replace_paren(expression *parent, expression *expr, error *e, file_cont
             case OPEN_PAREN:
             {
                 expression sub;
-                vec_subvec(parent->nodes, sub.nodes, ind - 1);
+                vec temp;
+                vec_subvec(parent->nodes, &temp, ind - 1);
+                sub.nodes = &temp;
                 if (!ast_replace_paren(parent, &sub, e, cont))
                     return false;
                 // after that call the current pointer now points to the new sub expression
@@ -416,6 +420,7 @@ bool ast_replace_paren(expression *parent, expression *expr, error *e, file_cont
             }
             ind++;
         }
+        paren = ast_find_node_ref(parent, OPEN_PAREN, OPER, start - 1);
     }
     if ((paren = ast_find_node_ref(parent, CLOSE_PAREN, OPER, start - 1)) != NULL)
     {
