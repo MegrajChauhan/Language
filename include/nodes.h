@@ -22,6 +22,7 @@ enum expr_t
     ARR_LENGTH,
     NORMAL_EXPR,
     ARR_ASSIGNMENT,
+    STR_ARR_ASSIGNMENT,
     MULTI_DIMENSION_ARR_ASSIGNMENT,
     STR_MULTI_DIMENSION_ARR_ASSIGNMENT, // special case(strings are acceptable as arrays)
     STRING_ASSIGN,

@@ -34,8 +34,20 @@ bool deduce_expression_type(type *type_of_var, expr_t *res)
         size_t dimension = get_dimension_of_array(type_of_var);
         if (dimension > 1)
         {
+            if (is_array_fit_for_string(type_of_var))
+                *res = STR_MULTI_DIMENSION_ARR_ASSIGNMENT; // for now
+        }
+        else
+        {
+            if (is_array_fit_for_string(type_of_var))
+                *res = STR_ARR_ASSIGNMENT;
+            else
+                *res = ARR_ASSIGNMENT;
         }
     }
+    else
+        *res = NORMAL_EXPR;
+    return true;
 }
 
 // bool is_type_primitive(type *type_to_check)
@@ -54,4 +66,21 @@ bool is_array_fit_for_string(type *array_type)
     if (array_type->base == UNSIGNED_BYTE)
         return true;
     return false;
+}
+
+bool deduce_variable_type(expression *expr, type *to_build, error *err, file_context *cont)
+{
+    // This is rather complicated but with the help of the expression, we should be able to do it
+    for (size_t i = 0; i < expr->nodes->count; i++)
+    {
+        expression_nodes *curr_node = (expression_nodes *)vec_at(expr->nodes, i);
+        switch (curr_node->type)
+        {
+        case DATA:
+        {
+            
+        }
+        case SYM:
+        }
+    }
 }

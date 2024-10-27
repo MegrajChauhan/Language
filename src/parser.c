@@ -103,7 +103,7 @@ bool parse_add_expression(parser *p, expression *expr, uint64_t until)
         else if (tok.kind == STR || tok.kind == NUM_FLOAT || tok.kind == NUM_INT || tok.kind == FALSE || tok.kind == TRUE)
             n.type = DATA;
         else if (tok.kind == IDENTIFIER)
-            n.type = VAR;
+            n.type = SYM;
         else
         {
             error_unexp_tok err;
