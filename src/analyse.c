@@ -52,14 +52,14 @@ bool variable_declaration(namespace *ns, node *n, error *e)
         return false;
     ast_destroy(test);
     // add to the symbol table
-    symtable_entry new_ent;
-    new_ent.kind = _VARIABLE;
-    new_ent.parent = ns->cont;
-    new_ent.ptr = n;
-    new_ent.t = vd->_t;
-    new_ent._const = vd->_const;
-    if (!symtable_add(ns->table, &new_ent, vd->name))
-        return false;
+    // symtable_entry new_ent;
+    // new_ent.kind = _VARIABLE;
+    // new_ent.parent = ns->cont;
+    // new_ent.ptr = n;
+    // new_ent.t = vd->_t;
+    // new_ent._const = vd->_const;
+    // if (!symtable_add(ns->table, &new_ent, vd->name))
+    //     return false;
     return true;
 }
 
@@ -99,6 +99,7 @@ bool analyse_type(namespace *ns, node *n, type *t, error *e)
                             internal_err();
                             return false;
                         }
+                        curr->expr._type = ARR_LENGTH;
                         if (!expr_to_ast(test, &curr->expr, e, ns->cont))
                             return false;
                         ast_destroy(test);

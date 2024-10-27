@@ -20,10 +20,11 @@ enum node_t
 enum expr_t
 {
     ARR_LENGTH,
-    ARR_ASSIGNMENT,
     NORMAL_EXPR,
+    ARR_ASSIGNMENT,
+    MULTI_DIMENSION_ARR_ASSIGNMENT,
+    STR_MULTI_DIMENSION_ARR_ASSIGNMENT, // special case(strings are acceptable as arrays)
     STRING_ASSIGN,
-    VAR_NAME,
 };
 
 enum exprnode_t
@@ -54,7 +55,7 @@ struct node
 struct expression
 {
     vec *nodes;
-    expr_t _type; // could be any kind
+    expr_t _type;   // could be any kind
                     // an array assignment needs to be evaluated differently
                     // than a regular expression
     bool must_eval; // the expression must be evaluated at compile-time?

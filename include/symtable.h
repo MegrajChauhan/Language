@@ -22,11 +22,32 @@ enum symentry_t
 
 struct symtable_entry
 {
-    type *t; // Just take the one from the node
-    void *ptr;
+    type *t;     // Just take the one from the node
     bool _const; // is the entry a constant
     symentry_t kind;
     file_context *parent;
+
+    union
+    {
+        struct
+        {
+            bool _is_multi_dimensional_;
+            size_t dimension_count;
+            void *_node_;
+            expression *value;
+        } array;
+
+        struct
+        {
+            void *_node_;
+            expression_nodes *value;
+        } variable;
+
+        struct
+        {
+            void *ns;
+        } _namespace_;
+    };
 };
 
 struct symtable
