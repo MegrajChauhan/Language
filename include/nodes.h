@@ -93,6 +93,7 @@ struct type
     type *next;
     expression expr;
     size_t off, offe, col;
+    size_t _length_;
 };
 
 struct node_var_declr

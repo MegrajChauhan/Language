@@ -79,6 +79,7 @@ bool analyse_type(namespace *ns, node *n, type *t, error *e)
     case FLOAT:
     case DOUBLE:
     {
+        type *old = curr;
         if (curr->next)
         {
             switch (curr->next->base)
@@ -87,6 +88,7 @@ bool analyse_type(namespace *ns, node *n, type *t, error *e)
             {
                 // This is an array and we need to evaluate the length expression
                 curr = curr->next;
+                bool _length_deducable_ = true;
                 // handling multi-dimensional arrays
                 while (curr && curr->base == ARRAY)
                 {
@@ -102,8 +104,14 @@ bool analyse_type(namespace *ns, node *n, type *t, error *e)
                         curr->expr._type = ARR_LENGTH;
                         if (!expr_to_ast(test, &curr->expr, e, ns->cont))
                             return false;
+                        // if (_length_deducable_)
+                        // curr->_length_ = ..; // update this
                         ast_destroy(test);
                     }
+                    else
+                        _length_deducable_ = false;
+                    if (_length_deducable_)
+                        old = curr;
                     curr = curr->next;
                 }
                 break;

@@ -375,7 +375,7 @@ void __redeclration(error_entry *e)
         }
     }
     putc('\n', stderr);
-    node *n = (node *)err->original->ptr;
+    node *n = (node *)err->original->variable._node_;
     fprintf(stderr, "%s:%lu:%lu: Declared here first.\n", err->original->parent->entry.fname, n->l_st, n->c_st);
     fprintf(stderr, "LINE:");
     i = err->original->parent->entry.stream + (n->o_st);

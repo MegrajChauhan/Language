@@ -165,42 +165,59 @@ bool parser_gen_type(parser *p, type *t, node *parent)
         {
         case U8:
             curr->base = UNSIGNED_BYTE;
+            curr->_length_ = 1;
             break;
         case U16:
             curr->base = UNSIGNED_WORD;
+            curr->_length_ = 2;
             break;
         case U32:
             curr->base = UNSIGNED_DWORD;
+            curr->_length_ = 4;
             break;
         case U64:
             curr->base = UNSIGNED_QWORD;
+            curr->_length_ = 8;
             break;
         case I8:
             curr->base = SIGNED_BYTE;
+            curr->_length_ = 1;
             break;
         case I16:
             curr->base = SIGNED_WORD;
+            curr->_length_ = 2;
             break;
         case I32:
             curr->base = SIGNED_DWORD;
+            curr->_length_ = 4;
             break;
         case I64:
             curr->base = SIGNED_QWORD;
+            curr->_length_ = 8;
             break;
         case F32:
             curr->base = FLOAT;
+            curr->_length_ = 4;
             break;
         case F64:
             curr->base = DOUBLE;
+            curr->_length_ = 8;
+            break;
+        case BOOL:
+            curr->base = BOOLEAN;
+            curr->_length_ = 1;
             break;
         case CONST:
             curr->base = TCONST;
+            curr->_length_ = 0;
             break;
         case VOID:
             curr->base = TVOID;
+            curr->_length_ = 0;
             break;
         case IDENTIFIER:
             curr->base = USER_DEF;
+            curr->_length_ = 0;
             break;
         case OPEN_BIGBRAC:
         {
@@ -229,6 +246,7 @@ bool parser_gen_type(parser *p, type *t, node *parent)
                 // Array length evaluation is not compulsory to be known at
                 // compile-time
             }
+            curr->_length_ = 0; // gotta figure this out
             break;
         }
         default:

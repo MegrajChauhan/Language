@@ -34,7 +34,24 @@ bool deduce_expression_type(type *type_of_var, expr_t *res)
         size_t dimension = get_dimension_of_array(type_of_var);
         if (dimension > 1)
         {
-                       
         }
     }
+}
+
+// bool is_type_primitive(type *type_to_check)
+// {
+//     if (type_to_check->base >= SIGNED_BYTE && type_to_check->base <= BOOLEAN)
+//         return true;
+//     return false;
+// }
+
+bool is_array_fit_for_string(type *array_type)
+{
+    // 'u8[]' can accept a string as the assignment.
+    // 'u8[][]...' can also accept strings as the assignment(each string will be given the length of the longest one)
+    /// NOTE: 'u8*[]' doesn't accept strings for assignments
+    /// NOTE: 'u8**[]' also cannot accept strings for assignments
+    if (array_type->base == UNSIGNED_BYTE)
+        return true;
+    return false;
 }
