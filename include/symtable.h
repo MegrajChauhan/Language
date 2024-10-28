@@ -5,7 +5,6 @@
 #include "defs.h"
 #include "umap.h"
 #include "nodes.h"
-#include "ast.h"
 
 typedef struct symtable_entry symtable_entry;
 typedef struct symtable symtable;
@@ -35,7 +34,7 @@ struct symtable_entry
             bool _is_multi_dimensional_;
             size_t dimension_count;
             void *_node_;
-            ast *value;
+            void *value;
         } array;
 
         struct

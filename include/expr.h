@@ -9,24 +9,27 @@
 #include "ast.h"
 #include <stdlib.h>
 
-typedef struct expr_evaluator expr_evaluator;
 typedef struct expr_result expr_result;
+typedef struct expr_state expr_state;
 
 struct expr_result
 {
     type *t;
-    void *val;
+    ast_node *val;
 };
 
-struct expr_evaluator
+struct expr_state
 {
-    ast *tree;       // the tree to evaluate
-    error *e;        // error handling
-    expr_result res; // the result
-
-    namespace *parent;
-    // config
-    node *res_type; // variable node
+    namespace *ns;
+    error *e;
+    ast *tree;
+    symtable_entry *last_var_entry; // for type checks
 };
+
+expr_result *evaluate_expression(ast *tree, namespace *ns, error *e);
+
+expr_result *simple_expression_evaluation(expr_state *state);
+
+bool evaluate_node(ast_node *n, expr_state *state);
 
 #endif

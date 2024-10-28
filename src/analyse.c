@@ -52,7 +52,7 @@ bool variable_declaration(namespace *ns, node *n, error *e)
         internal_err();
         return false;
     }
-    deduce_expression_type(&vd->_t, &vd->expr._type);
+    // deduce_expression_type(&vd->_t, &vd->expr._type);
     if (!expr_to_ast(test, &vd->expr, e, ns->cont))
         return false;
     ast_destroy(test);

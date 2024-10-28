@@ -161,6 +161,12 @@ ast_node *ast_get_root_node(expression *expr)
     expression_nodes *root = NULL;
     new_node->left = NULL;
     new_node->right = NULL;
+    if ((root = ast_find_node(expr, STR, DATA)) != NULL)
+    {
+        // This already makes it illegal for anything else to be in the expression
+        new_node->n = root;
+        return new_node;
+    }
     if ((root = ast_find_node(expr, LOR, OPER)) != NULL)
         new_node->n = root;
     else if ((root = ast_find_node(expr, LAND, OPER)) != NULL)
@@ -283,6 +289,18 @@ ast_node *ast_build_tree(expression *parent, expression *expr, error *e, file_co
     if (expr->nodes->count == 1)
         return root;
     size_t ind = vec_index_of(expr->nodes, root->n);
+
+    if ((root->n->type == DATA || root->n->type == SUB_EXPR) && expr->nodes->count > 1)
+    {
+        // error!!!
+        error_inval_expr err;
+        expression_nodes *n = vec_at(expr->nodes, 1);
+        err.err_off_st = n->offst;
+        err.err_off_ed = n->offed;
+        err.expr = parent;
+        error_add_complex(e, &err, fcont, INVALID_EXPR);
+        return false;
+    }
 
     // Now the nodes may be just an array indexing
     vec prevec, subvec;
@@ -509,6 +527,23 @@ bool ast_handle_possible_identifiers(expression *expr, error *e, file_context *c
                 return false;
             if (!ast_handle_possible_identifiers(&new._array_indexing_.index, e, cont))
                 return false;
+        }
+        else if (nxt->tok_type == OPEN_PAREN)
+        {
+            // for function calls in future
+        }
+        else
+        {
+            if (nxt->type != OPER)
+            {
+                // pretty big illegal error you got
+                error_inval_expr err;
+                err.err_off_st = id->offst;
+                err.err_off_ed = id->offed;
+                err.expr = expr;
+                error_add_complex(e, &err, cont, INVALID_EXPR);
+                return false;
+            }
         }
         id = ast_find_node_ref(expr, IDENTIFIER, SYM, ind);
     }
