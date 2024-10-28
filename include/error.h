@@ -39,6 +39,8 @@ enum error_t
     STARY_OPENING_PARENTHESIS,
     STRAY_OPEN_BIGBRAC,
     STRAY_CLOSE_BIGBRAC,
+
+    EXPR_VAR_DOESNT_EXIST,
 };
 
 typedef struct error error;

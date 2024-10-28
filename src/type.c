@@ -68,9 +68,10 @@ bool is_array_fit_for_string(type *array_type)
     return false;
 }
 
-bool deduce_variable_type(expression *expr, type *to_build, error *err, file_context *cont)
+bool deduce_variable_type(expression *expr, type *to_build, namespace *ns, error *err)
 {
     // This is rather complicated but with the help of the expression, we should be able to do it
+    bool _float_found_ = false;
     for (size_t i = 0; i < expr->nodes->count; i++)
     {
         expression_nodes *curr_node = (expression_nodes *)vec_at(expr->nodes, i);
@@ -78,9 +79,29 @@ bool deduce_variable_type(expression *expr, type *to_build, error *err, file_con
         {
         case DATA:
         {
-            
+            // if (curr_node->tok_type == NUM_INT)
+            if (curr_node->tok_type == NUM_FLOAT)
+                _float_found_ = true;
+            break;
         }
         case SYM:
+        {
+            // we need to get the type of this variable
+            symtable_entry *ent = namespace_query_symtable(ns, curr_node->_var_or_value_or_oper_.name_or_value_or_oper);
+            if (!ent)
+            {
+                error_inval_expr e;
+                e.err_off_st = curr_node->offst;
+                e.err_off_ed = curr_node->offed;
+                e.expr = expr;
+                error_add_complex(err, &e, ns->cont, EXPR_VAR_DOESNT_EXIST);
+                return false;
+            }
+            // this variable basically inherits the type of the sub-variable
+            to_build->base = ent->t->base;
+            to_build->col = ent->t->col;
+            // to_build->
+        }
         }
     }
 }
