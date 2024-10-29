@@ -41,6 +41,7 @@ enum error_t
     STRAY_CLOSE_BIGBRAC,
 
     EXPR_VAR_DOESNT_EXIST,
+    VAR_TYPE_MISMATCH,
 };
 
 typedef struct error error;
@@ -49,11 +50,12 @@ typedef struct error_unexp_tok error_unexp_tok;
 typedef struct error_redeclr error_redeclr;
 typedef struct error_inval_type_expr error_inval_type_expr;
 typedef struct error_inval_expr error_inval_expr;
+typedef struct error_type_mismatch error_type_mismatch;
 
 struct error_entry
 {
     file_context *error_context; // the file where the error occured
-    error_t kind;               // kind of error(for context)
+    error_t kind;                // kind of error(for context)
 
     // in case of lexers, both endings and startings would be the same
     // but this extra info will be useful with parsers and semantic analysis
@@ -90,6 +92,13 @@ struct error_inval_expr
 {
     expression *expr;
     size_t err_off_st, err_off_ed;
+};
+
+struct error_type_mismatch
+{
+    node *parent;
+    symtable_entry *ent1;
+    symtable_entry *ent2;
 };
 
 struct error

@@ -105,3 +105,29 @@ bool deduce_variable_type(expression *expr, type *to_build, namespace *ns, error
         }
     }
 }
+
+bool compare_type_size_not_considered(type *t1, type *t2)
+{
+    if (t1 == t2)
+        return true;
+    type *curr1 = t1;
+    type *curr2 = t2;
+    while (true)
+    {
+        if (!curr1 && !curr2)
+            break;
+        if ((curr1->base == curr2->base) || (curr1->base >= SIGNED_BYTE && curr1->base <= BOOLEAN && curr2->base >= SIGNED_BYTE && curr2->base <= BOOLEAN))
+        {
+            if (curr1->base == ARRAY)
+            {
+                if (curr1->_length_ != curr2->_length_)
+                    return false;
+            }
+            curr1 = curr1->next;
+            curr2 = curr2->next;
+        }
+        else
+            return false;
+    }
+    return true;
+}

@@ -34,7 +34,7 @@ struct symtable_entry
             bool _is_multi_dimensional_;
             size_t dimension_count;
             void *_node_;
-            void *value;
+            vec *values;
         } array;
 
         struct

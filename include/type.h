@@ -18,4 +18,6 @@ bool is_array_fit_for_string(type *array_type);
 
 bool deduce_variable_type(expression *expr, type *to_build, namespace *ns, error *err);
 
+bool compare_type_size_not_considered(type *t1, type *t2);
+
 #endif
