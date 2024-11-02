@@ -1,130 +1,134 @@
 #include "vec.h"
 
-vec *vec_init(size_t len, size_t elen)
+vec *vec_init(size_t elem_len, size_t init_cap)
 {
     vec *v = (vec *)malloc(sizeof(vec));
     if (!v)
-        return NULL;
-
-    v->buf = malloc(len * elen);
-    if (!v->buf)
     {
+        report_internal_error("Failed to initialize a vector\n");
+        return NULL;
+    }
+    v->buffer = (void *)malloc(init_cap * elem_len);
+    if (!v->buffer)
+    {
+        report_internal_error("Failed to initialize vector buffer\n");
         free(v);
         return NULL;
     }
-
-    v->cap = len;
-    v->count = 0;
-    v->elen = elen;
-
+    v->elem_cap = init_cap;
+    v->elem_count = 0;
+    v->elem_len = elem_len;
     return v;
+}
+
+vec *vec_resize(vec *orig, size_t factor)
+{
+    /// NOTE: For those wondering, this check is for validating if the compiler itself corrupts the ptr somehow
+    check_ptr(orig, buffer);
+    orig->buffer = (void *)realloc(orig->buffer, orig->elem_cap * orig->elem_len * factor);
+    if (!orig->buffer)
+    {
+        report_internal_error("Failed to resize vector buffer\n");
+        return NULL;
+    }
+    orig->elem_cap *= factor;
+    return orig;
+}
+
+vec *vec_crunch(vec *orig)
+{
+    check_ptr(orig, buffer);
+    orig->buffer = (void *)realloc(orig->buffer, orig->elem_len * orig->elem_count);
+    if (!orig->buffer)
+    {
+        report_internal_error("Failed to crunch vector buffer\n");
+        return NULL;
+    }
+    orig->elem_cap = orig->elem_count;
+    return orig;
 }
 
 bool vec_push(vec *v, void *elem)
 {
-    if (v->count == v->cap)
+    check_ptr(v, buffer);
+    if (vec_full(v))
     {
-        size_t new_cap = v->cap * _VEC_FACTOR;
-        void *new_buf = realloc(v->buf, new_cap * v->elen);
-        if (!new_buf)
+        // try to resize the vector
+        v = vec_resize(v, VEC_RESIZE_FACTOR);
+        if (!v)
             return false;
-
-        v->buf = new_buf;
-        v->cap = new_cap;
     }
-
-    memcpy((char *)v->buf + (v->count * v->elen), elem, v->elen);
-    v->count++;
+    void *current = (char *)v->buffer + v->elem_count * v->elem_len;
+    memcpy(current, elem, v->elem_len); // shouldn't fail
+    v->elem_count++;
     return true;
 }
 
-bool vec_pop(vec *v)
+void *vec_pop(vec *v)
 {
-    if (v->count == 0)
-        return false;
-
-    v->count--;
-    return true;
-}
-
-void *vec_at(vec *v, size_t ind)
-{
-    if (ind >= v->count)
+    // we will return a pointer to the popped element.
+    // if it is used then good otherwise it maybe ignored as well!
+    check_ptr(v, buffer);
+    if (vec_empty(v))
+    {
+        fmt_internal_error("Failed to pop an element from a vector.\n", NULL);
+        crash();
         return NULL;
-    return (void *)(((char *)v->buf + (ind * v->elen)));
+    }
+    void *popped_element = (char *)v->buffer + v->elem_len * v->elem_count;
+    v->elem_count--;
+    return popped_element;
 }
 
-bool vec_crunch(vec *v)
+void *vec_at(vec *v, size_t index)
 {
-    // crunch the vector to just fit the array
-    // useful when the vector is sure to not grow
-    // and this saves memory as well(though the chances of fragmentation increases)
-    // i hope stdlib will move the array somewhere else to reduce fragmentation otherwise this will be useless to do
-    v->buf = realloc(v->buf, v->count * v->elen);
-    if (v->buf == NULL)
-        return false;
-    v->cap = v->count;
-    return true;
-}
-
-void vec_subvec(vec *v, vec *res, size_t st_ind)
-{
-    // make a sub vector
-    size_t new_count = v->count - (++st_ind);
-    void *new_buf = ((char *)v->buf) + (st_ind)*v->elen;
-    res->buf = new_buf;
-    res->cap = v->cap - (st_ind);
-    res->count = new_count;
-    res->elen = v->elen;
-    return;
-}
-
-void vec_prevec(vec *v, vec *res, size_t upto)
-{
-    void *new_buf = (v->buf);
-    res->buf = new_buf;
-    res->cap = v->cap;
-    res->count = upto;
-    res->elen = v->elen;
-    return;
+    check_ptr(v, buffer);
+    if (vec_empty(v))
+    {
+        // If index is supposed to be valid then why is the vector empty?
+        fmt_internal_error("Failed to get the element at index of a vector.\n", NULL);
+        crash();
+        return NULL;
+    }
+    if (v->elem_count <= index)
+    {
+        fmt_internal_error("Invalid indexing for a vector.\n", NULL);
+        crash();
+        return NULL;
+    }
+    return ((char *)v->buffer + v->elem_len * index);
 }
 
 size_t vec_index_of(vec *v, void *elem)
 {
-    return (elem - v->buf) / v->elen;
+    check_ptr(v, buffer);
+    if (vec_empty(v))
+    {
+        // If elem is supposed to be valid then why is the vector empty?
+        fmt_internal_error("Failed to get the index of element of a vector.\n", NULL);
+        crash();
+        return -1;
+    }
+    return ((elem - v->buffer) / v->elem_len);
+}
+
+// this becomes useful when the vector is holding pointers to some structure
+void vec_clean(vec *v, __cleanup_func func)
+{
+    check_ptr(v, buffer);
+    for (size_t i = 0; i < v->elem_count; i++)
+        func(vec_at(v, i)); // the vec_at shouldn't fail here(it mustn't)
+}
+
+void vec_dump(vec *v, __dump_func func)
+{
+    vec_clean(v, func); // the same thing
 }
 
 void vec_destroy(vec *v)
 {
-    free(v->buf);
+    check_ptr(v, buffer);
+    free(v->buffer);
     free(v);
-}
-
-void vec_remove(vec *v, size_t ind_start, size_t upto, void *elem)
-{
-    void *dest = (char *)v->buf + ind_start * v->elen + ((elem) ? v->elen : 0);
-    size_t removing = (upto - ind_start) + 1;
-    size_t remaining = (v->count - upto - 1) * v->elen;
-    void *src = (char *)v->buf + (upto + 1) * v->elen;
-    memcpy(dest, src, remaining);
-    if (elem)
-    {
-        memcpy((char *)dest - v->elen, elem, v->elen);
-        v->count++;
-    }
-    v->count -= removing;
-}
-
-vec *vec_create_sub(vec *parent, size_t st, size_t ed)
-{
-    size_t len = (ed - st) + 1;
-    vec *child = vec_init(len, parent->elen);
-    if (!child)
-        return NULL;
-    void *_st_ = (char *)parent->buf + (st * parent->elen);
-    size_t length = len * parent->elen;
-    memcpy(child->buf, _st_, length);
-    child->count = len;
-    child->elen = parent->elen;
-    return child;
+    return;
 }
