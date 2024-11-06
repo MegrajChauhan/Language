@@ -7,11 +7,9 @@
 #include "report.h"
 #include "utils.h"
 #include "compiler.h"
+#include "defs.h"
 
 typedef struct vec vec;
-
-// take the element and perform cleanup
-typedef void (*__cleanup_func)(void *elem);
 
 // This function takes an element and dumps it
 typedef __cleanup_func __dump_func;
