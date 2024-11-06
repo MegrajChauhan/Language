@@ -1,0 +1,34 @@
+#ifndef _ERROR_
+#define _ERROR_
+
+#include "queue.h"
+#include "report.h"
+#include "utils.h"
+#include <stdlib.h>
+#include <stdbool.h>
+
+typedef struct _error_entry _error_entry;
+typedef struct error error;
+typedef void (*__error_hdlr)(void *state, void *comp);
+
+struct _error_entry
+{
+    void *state;
+    void *component;
+    __error_hdlr hdlr;
+};
+
+struct error
+{
+    queue *errors;
+};
+
+error *error_init();
+
+void error_add_entry(error *e,void *state, void *component, __error_hdlr hdlr);
+
+void error_handle(error *e);
+
+void error_destroy(error *e);
+
+#endif

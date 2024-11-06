@@ -5,6 +5,7 @@
 #include "report.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 typedef struct stream stream;
 

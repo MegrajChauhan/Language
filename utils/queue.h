@@ -10,12 +10,14 @@
 typedef struct queue queue;
 typedef struct _queue_node _queue_node;
 
-struct _queue_node {
+struct _queue_node
+{
     void *data;
     _queue_node *next;
 };
 
-struct queue {
+struct queue
+{
     _queue_node *front;
     _queue_node *rear;
     size_t size;
