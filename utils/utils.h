@@ -46,4 +46,6 @@
 #define SEPARATOR '\\'
 #endif
 
+#define nil(ptr) (ptr = NULL)
+
 #endif
