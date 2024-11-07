@@ -2,6 +2,7 @@
 #define _SLICE_
 
 #include "utils.h"
+#include "defs.h"
 #include "report.h"
 #include <stdlib.h>
 #include <string.h>
@@ -25,8 +26,10 @@ size_t slice_len(slice *sl);
 char *slice_to_str(slice *sl);
 
 // true for same and equal
-bool slice_cmp(slice *sl1, slice *sl2);
+bool slice_cmp(void *sl1, void *sl2);
 
-void slice_destroy(slice *sl);
+void slice_destroy(void *sl);
+
+size_t slice_hash(void *sl, size_t bucket_count);
 
 #endif

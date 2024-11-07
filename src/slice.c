@@ -32,13 +32,13 @@ char *slice_to_str(slice *sl)
     return str;
 }
 
-bool slice_cmp(slice *sl1, slice *sl2)
+bool slice_cmp(void *sl1, void *sl2)
 {
-    if (slice_len(sl1) != slice_len(sl2))
+    if (slice_len((slice*)sl1) != slice_len((slice*)sl2))
         return false;
-    char *iter1 = sl1->st;
-    char *iter2 = sl2->st;
-    while (iter1 != sl2->ed)
+    char *iter1 = ((slice*)sl1)->st;
+    char *iter2 = ((slice*)sl2)->st;
+    while (iter1 != ((slice*)sl2)->ed)
     {
         if (*iter1 != *iter2)
             return false;
@@ -48,10 +48,23 @@ bool slice_cmp(slice *sl1, slice *sl2)
     return true;
 }
 
-void slice_destroy(slice *sl)
+void slice_destroy(void *sl)
 {
     check_source(sl);
-    sl->ed = NULL;
-    sl->st = NULL;
+    ((slice*)sl)->ed = NULL;
+    ((slice*)sl)->st = NULL;
     free(sl);
+}
+
+size_t slice_hash(void *sl, size_t bucket_count)
+{
+    char *temp = slice_to_str((slice*)sl);
+    if (!temp)
+    {
+        report_internal_error("Failed to hash a slice.");
+        crash(); // don't continue here
+    }
+    size_t ret = string_hash(temp, bucket_count);
+    free(temp);
+    return ret;
 }
