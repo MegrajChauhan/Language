@@ -5,6 +5,7 @@
 #include "report.h"
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 typedef struct stack stack;
 
@@ -24,6 +25,6 @@ void *stack_pop(stack *stk);
 
 void *stack_peek(stack *stk);
 
-void stack_destroy(stack *stk)
+void stack_destroy(stack *stk);
 
 #endif

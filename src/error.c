@@ -19,7 +19,7 @@ void error_add_entry(error *e, void *state, void *component, __error_hdlr hdlr)
     _error_entry *ent = (_error_entry *)malloc(sizeof(_error_entry));
     if (!ent)
     {
-        report_internal_error('Error handler error.');
+        report_internal_error("Error handler error.");
         crash(); // this is fatal
     }
     ent->component = component;
@@ -27,7 +27,7 @@ void error_add_entry(error *e, void *state, void *component, __error_hdlr hdlr)
     ent->state = state;
     if (!queue_enqueue(e->errors, ent))
     {
-        report_internal_error('Error handler error.');
+        report_internal_error("Error handler error.");
         crash(); // fatal
     }
 }

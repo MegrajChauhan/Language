@@ -8,7 +8,7 @@ size_t string_hash(void *key, size_t bucket_count)
     uint32_t r2 = 13;
     uint32_t m = 5;
     uint32_t n = 0xe6546b64;
-    uint32_t hash = seed;
+    uint32_t hash = 0;
     size_t len = strlen((const char*)key);
 
     const int nblocks = len / 4;

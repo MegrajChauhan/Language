@@ -66,7 +66,7 @@ void *stack_peek(stack *stk)
 
 void stack_destroy(stack *stk)
 {
-    check_ptr(stk);
+    check_ptr(stk, buffer);
     free(stk->buffer);
     free(stk);
 }

@@ -29,7 +29,7 @@ char *slice_to_str(slice *sl)
     }
     memcpy(str, sl->st, len - 1);
     str[len - 1] = 0;
-    return sl;
+    return str;
 }
 
 bool slice_cmp(slice *sl1, slice *sl2)

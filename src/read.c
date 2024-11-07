@@ -5,7 +5,7 @@ static bool check_file_ext(char *path)
     size_t len = strlen(path);
     if (len < 2)
         return false;
-    char *st = path - 2;
+    char *st = path + (len - 2);
     return (strcmp(st, ".l") == 0);
 }
 
@@ -23,6 +23,7 @@ file *file_read(char *path)
         return NULL;
     }
     FILE *fd = fopen(path, "r");
+
     if (!fd)
     {
         switch (errno)
@@ -36,12 +37,32 @@ file *file_read(char *path)
         free(f);
         return NULL;
     }
-    fseek(fd, SEEK_END, SEEK_CUR);
+
+    /**
+     * Since fopen doesn't fail even if you trying opening a directory,
+     * we need some form of sanity checks to verify the file.
+     * If fopen works but IO fails then we may seek errno to know if it is a directory
+     */
+    if (fgetc(fd) == EOF)
+    {
+        switch (errno)
+        {
+        case EISDIR:
+            report("The given input file \"%s%s%s\" is actually a directory.\n", BOLDWHITE, path, RESET);
+            break;
+        }
+        free(f);
+        fclose(fd);
+        return NULL;
+    }
+    else
+        rewind(fd); // success
+
+    fseek(fd, SEEK_SET, SEEK_END);
     size_t file_len = ftell(fd);
     rewind(fd);
-    char buf[file_len + 1];
+    char buf[file_len];
     fread(buf, 1, file_len, fd);
-    buf[file_len] = 0;
 
     if ((f->fdata = stream_create(1, file_len)) == NULL)
     {
@@ -52,4 +73,11 @@ file *file_read(char *path)
     stream_populate(f->fdata, buf, file_len); // no way for this to fail
     fclose(fd);
     return f;
+}
+
+void file_close(file *f)
+{
+    check_ptr(f, fdata);
+    stream_destroy(f->fdata);
+    free(f);
 }

@@ -31,7 +31,7 @@ void *stream_read(stream *strm)
     if (strm->read_ptr >= strm->elem_count)
         return NULL; // No more elements to read
 
-    void *elem = (char *)strm->buffer + strm->buffer_ptr * strm->elem_len;
+    void *elem = (char *)strm->buffer + strm->read_ptr * strm->elem_len;
     strm->read_ptr++;
     return elem;
 }
@@ -46,7 +46,7 @@ bool stream_write(stream *strm, void *data)
         return false;
     }
 
-    memcpy((char *)strm->buffer + strm->buffer_ptr * strm->elem_len, data, strm->elem_len);
+    memcpy((char *)strm->buffer + strm->write_ptr * strm->elem_len, data, strm->elem_len);
     strm->write_ptr++;
     return true;
 }
@@ -55,7 +55,7 @@ bool stream_populate(stream *strm, void *data, size_t nelem)
 {
     check_ptr(strm, buffer);
 
-    if (strm->write_ptr >= strm->elem_count || (strm->write_ptr + nelem) >= strm->elem_count)
+    if (strm->write_ptr >= strm->elem_count || (strm->write_ptr + nelem) > strm->elem_count)
     {
         report_internal_error("Stream buffer overflow.");
         return false;
