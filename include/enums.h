@@ -6,6 +6,7 @@ typedef enum error_t error_t;
 
 enum token_t
 {
+    TOK_EOF,
     EMPTY,
 };
 

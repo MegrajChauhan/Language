@@ -7,29 +7,43 @@
 #include "enums.h"
 #include "error.h"
 #include "slice.h"
+#include "file_context.h"
 #include <stdlib.h>
 #include <stdbool.h>
 
 typedef struct token token;
 typedef struct lexer lexer;
-typedef struct lexer_error lexer_error;
+
+// lexer state
+typedef struct lexer_state lexer_state;
 
 struct token
 {
     token_t kind;
-    slice *value;
+    slice value;
     size_t line, col;
 };
 
 struct lexer
 {
     file *_f;
-    error *err;
+    size_t line, col;
+    char curr;
 };
 
-struct lexer_error
+struct lexer_state
 {
     error_t kind;
+    size_t line, col;
+    slice val;
 };
+
+lexer *lexer_init(file *_f);
+
+bool next_token(lexer *l, token *t);
+
+void update_lexer(lexer *l);
+
+void lexer_destroy(lexer *l);
 
 #endif

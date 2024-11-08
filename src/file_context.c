@@ -82,3 +82,8 @@ bool file_context_add_child(file_context *fcont)
     }
     return true;
 }
+
+void set_current_file_conext(file_context *fcont)
+{
+    current_active = fcont;
+}
