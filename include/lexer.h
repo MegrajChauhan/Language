@@ -7,7 +7,7 @@
 #include "enums.h"
 #include "error.h"
 #include "slice.h"
-#include "file_context.h"
+#include "global_hdlr.h"
 #include <stdlib.h>
 #include <stdbool.h>
 
@@ -44,6 +44,20 @@ bool next_token(lexer *l, token *t);
 
 void update_lexer(lexer *l);
 
+token_t identify_number_type(lexer *l);
+
+bool handle_decimal(lexer *l, token *t);
+
+bool handle_binary(lexer *l, token *t);
+
+bool handle_hex(lexer *l, token *t);
+
+bool handle_oct(lexer *l, token *t);
+
+bool get_number(lexer *l, token *t);
+
 void lexer_destroy(lexer *l);
+
+void lexer_add_error(lexer *l, error_t type, slice *value, __error_hdlr hdlr);
 
 #endif

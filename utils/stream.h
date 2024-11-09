@@ -37,4 +37,7 @@ bool stream_has_more(stream *strm);
 
 void stream_destroy(stream *strm);
 
+// Get a pointer to the current read position in the stream
+void *stream_at(stream *strm);
+
 #endif

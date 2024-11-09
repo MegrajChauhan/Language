@@ -114,3 +114,9 @@ void stream_destroy(stream *strm)
     free(strm->buffer);
     free(strm);
 }
+
+void *stream_at(stream *strm)
+{
+    check_source(strm, buffer);
+    return (char *)strm->buffer + strm->elem_len * (strm->read_ptr - 1);
+}

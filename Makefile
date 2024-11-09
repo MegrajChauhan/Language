@@ -1,6 +1,6 @@
 CC = gcc
 FLAGS = -Wall -Wextra -MMD -MP ${flags}
-DIRS = include utils
+DIRS = include utils include/errhdlr
 SRC_DIR = src/
 INC_DIRS = ${addprefix -I, ${DIRS}}
 

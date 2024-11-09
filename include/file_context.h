@@ -30,10 +30,6 @@ struct file_context
     // namespace *ns;
 };
 
-static file_context *current_active = NULL;
-
-void set_current_file_conext(file_context *fcont);
-
 file_context *file_context_create(file_context *parent);
 
 bool file_context_populate_stream(file_context *fcont, slice *file_path);

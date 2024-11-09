@@ -28,7 +28,7 @@ char *slice_to_str(slice *sl)
         return NULL;
     }
     memcpy(str, sl->st, len - 1);
-    str[len - 1] = 0;
+    str[len] = 0;
     return str;
 }
 
