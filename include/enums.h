@@ -13,6 +13,9 @@ enum token_t
     TOK_NUM_BINARY,
     TOK_NUM_OCTAL,
     TOK_NUM_HEX,
+
+    TOK_FIRST_KEY, // Pseudo key
+    TOK_LAST_KEY, // Pseudo key
 };
 
 enum error_t

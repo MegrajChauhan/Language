@@ -25,7 +25,6 @@ struct comp_context
 {
     file_context *root;    // the root file context(input file)
     uset *_all_used_files; // key = file path
-    umap *_keywords;       // map of all keywords
 
     // /**
     //  * While parsing, we parse one file at a time meaning even if we encounter an include statement, we won't go parse it first.
@@ -38,8 +37,6 @@ struct comp_context
 static comp_context *cont = NULL;
 
 comp_context *create_compilation_context();
-
-bool populate_keymap(umap *map);
 
 bool add_file_context(slice *file_path, file_context *parent);
 

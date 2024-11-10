@@ -56,6 +56,8 @@ bool handle_oct(lexer *l, token *t);
 
 bool get_number(lexer *l, token *t);
 
+bool get_identifier(lexer *l, token *t);
+
 void lexer_destroy(lexer *l);
 
 void lexer_add_error(lexer *l, error_t type, slice *value, __error_hdlr hdlr);

@@ -8,13 +8,8 @@ comp_context *create_compilation_context()
         report_internal_error("Failed to create compilation context.");
         return NULL;
     }
-    cont->_keywords = umap_create(KEYWORD_COUNT, slice_hash, slice_cmp, slice_destroy, NULL);
-    if (!cont->_keywords)
-        goto _err;
     cont->_all_used_files = uset_create(ASSUME_FILES_INCLUDED, slice_hash, slice_cmp, slice_destroy);
     if (!cont->_all_used_files)
-        goto _err;
-    if (!populate_keymap(cont->_keywords))
         goto _err;
     return cont; // temp
 _err:
@@ -26,8 +21,6 @@ _err:
 void destroy_compilation_context()
 {
     check_source(cont);
-    if (cont->_keywords)
-        umap_destroy(cont->_keywords);
     if (cont->root)
         file_context_destroy(cont->root);
     if (cont->_all_used_files)
@@ -52,8 +45,4 @@ bool add_file_context(slice *file_path, file_context *parent)
         return false;
     if (!uset_insert(cont->_all_used_files, file_path))
         return false;
-}
-
-bool populate_keymap(umap *map)
-{
 }

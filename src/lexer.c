@@ -53,6 +53,8 @@ bool next_token(lexer *l, token *t)
                 update_lexer(l);
         }
         else if (IsNum(l->curr))
+            return get_number(l, t);
+        else if (IsAlpha(l->curr))
         {
         }
     }
@@ -114,12 +116,81 @@ bool handle_decimal(lexer *l, token *t)
         t->kind = TOK_NUM_FLOAT;
     else
         t->kind = TOK_NUM_DECIMAL;
-    t->value = 
+    t->value.ed = (char *)stream_at(l->_f->fdata);
+    return true;
+}
+
+bool handle_binary(lexer *l, token *t)
+{
+    check_source(l);
+    t->col = l->col;
+    t->line = l->line;
+    t->value.st = (char *)stream_at(l->_f->fdata);
+    while (stream_has_more(l->_f->fdata) && (l->curr == '0' || l->curr == '1'))
+    {
+        update_lexer(l);
+    }
+    t->kind = TOK_NUM_BINARY;
+    t->value.ed = (char *)stream_at(l->_f->fdata);
+    return true;
+}
+
+bool handle_hex(lexer *l, token *t)
+{
+    check_source(l);
+    t->col = l->col;
+    t->line = l->line;
+    t->value.st = (char *)stream_at(l->_f->fdata);
+    while (stream_has_more(l->_f->fdata) && (IsNum(l->curr) || ((l->curr >= 'A' && l->curr <= 'Z') || (l->curr >= 'a' && l->curr <= 'z'))))
+    {
+        if ((l->curr >= 'a' && l->curr <= 'z'))
+            *(char *)stream_at(l->_f->fdata) = l->curr - 32;
+        update_lexer(l);
+    }
+    t->kind = TOK_NUM_HEX;
+    t->value.ed = (char *)stream_at(l->_f->fdata);
+    return true;
+}
+
+bool handle_oct(lexer *l, token *t)
+{
+    check_source(l);
+    t->col = l->col;
+    t->line = l->line;
+    t->value.st = (char *)stream_at(l->_f->fdata);
+    while (stream_has_more(l->_f->fdata) && (IsNum(l->curr) && (l->curr != '8' || l->curr != '9')))
+    {
+        if ((l->curr >= 'a' && l->curr <= 'z'))
+            *(char *)stream_at(l->_f->fdata) = l->curr - 32;
+        update_lexer(l);
+    }
+    t->kind = TOK_NUM_OCTAL;
+    t->value.ed = (char *)stream_at(l->_f->fdata);
     return true;
 }
 
 bool get_number(lexer *l, token *t)
 {
+    switch (identify_number_type(l))
+    {
+    case TOK_NUM_BINARY:
+        return handle_binary(l, t);
+    case TOK_NUM_DECIMAL:
+        return handle_decimal(l, t);
+    case TOK_NUM_HEX:
+        return handle_hex(l, t);
+    case TOK_NUM_OCTAL:
+        return handle_oct(l, t);
+    }
+    return false;
+}
+
+bool get_identifier(lexer *l, token *t)
+{
+    check_source(l);
+
+    // For an identifier, the rules are the same as in C
+    
 }
 
 void lexer_add_error(lexer *l, error_t type, slice *value, __error_hdlr hdlr)
