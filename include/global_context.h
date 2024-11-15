@@ -15,6 +15,8 @@ static umap *keys = NULL;
 
 bool populate_keys();
 
+token_t is_a_key(slice *val);
+
 void destroy_keys();
 
 #endif

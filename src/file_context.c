@@ -38,16 +38,16 @@ bool file_context_populate_stream(file_context *fcont, slice *file_path)
     char *path = slice_to_str(file_path);
     if (!path)
         return false;
-    fmt_log("POPULATING FILE STREAM: Path '%s'", path);
+    fmt_log("POPULATING FILE STREAM: Path '%s'\n", path);
     fcont->fstream = file_read(path);
     if (!fcont->fstream)
     {
-        fmt_log("POPULATING FILE STREAM(%sFailed%s): Path '%s'", BOLDRED, RESET, path);
+        fmt_log("POPULATING FILE STREAM(%sFailed%s): Path '%s'\n", BOLDRED, RESET, path);
         report_internal_error("Failed to populate file stream.");
         free(path);
         return false;
     }
-    fmt_log("POPULATING FILE STREAM(%sSuccess%s): Path '%s'", BOLDGREEN, RESET, path);
+    fmt_log("POPULATING FILE STREAM(%sSuccess%s): Path '%s'\n", BOLDGREEN, RESET, path);
     free(path);
     fcont->_stream_populated = true;
     fcont->file_name = file_path;
@@ -81,9 +81,4 @@ bool file_context_add_child(file_context *fcont)
         return false;
     }
     return true;
-}
-
-void set_current_file_conext(file_context *fcont)
-{
-    current_active = fcont;
 }

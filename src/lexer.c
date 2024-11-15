@@ -54,10 +54,10 @@ bool next_token(lexer *l, token *t)
         }
         else if (IsNum(l->curr))
             return get_number(l, t);
-        else if (IsAlpha(l->curr))
-        {
-        }
+        else if (IsAlpha(l->curr) ||l->curr == '_')
+           return get_identifier(l, t);
     }
+    return false;
 }
 
 token_t identify_number_type(lexer *l)
@@ -190,7 +190,14 @@ bool get_identifier(lexer *l, token *t)
     check_source(l);
 
     // For an identifier, the rules are the same as in C
-    
+    t->col = l->col;
+    t->line = l->line;
+    t->value.st = (char*)stream_at(l->_f->fdata);
+    while (stream_has_more(l->_f->fdata) && IsIdenNameInclusive(l->curr))
+        update_lexer(l);
+    t->value.ed = (char*)stream_at(l->_f->fdata);
+    t->kind = is_a_key(&t->value);
+    return true;
 }
 
 void lexer_add_error(lexer *l, error_t type, slice *value, __error_hdlr hdlr)

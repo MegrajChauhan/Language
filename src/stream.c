@@ -117,6 +117,6 @@ void stream_destroy(stream *strm)
 
 void *stream_at(stream *strm)
 {
-    check_source(strm, buffer);
+    check_ptr(strm, buffer);
     return (char *)strm->buffer + strm->elem_len * (strm->read_ptr - 1);
 }

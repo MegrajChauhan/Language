@@ -46,3 +46,18 @@ bool add_file_context(slice *file_path, file_context *parent)
     if (!uset_insert(cont->_all_used_files, file_path))
         return false;
 }
+
+bool add_base_file_context(file_context *base)
+{
+    check_source(cont);
+    check_source(base);
+    cont->root = base;
+    if (!uset_insert(cont->_all_used_files, base->file_name))
+        return false;
+    return true;
+}
+
+bool compile()
+{
+    return true;
+}

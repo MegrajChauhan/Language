@@ -38,9 +38,13 @@ static comp_context *cont = NULL;
 
 comp_context *create_compilation_context();
 
+bool add_base_file_context(file_context *base);
+
 bool add_file_context(slice *file_path, file_context *parent);
 
 bool file_already_exists(slice *file_path);
+
+bool compile();
 
 void destroy_compilation_context();
 

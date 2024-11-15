@@ -2,6 +2,7 @@
 
 void set_current_file_conext(file_context *fcont)
 {
+    // fmt_log("RESETTING CURRENT FILE CONTEXT: [FILE CHANGE: %s'%s' to '%s'%s]\n", BOLDWHITE, curr->file_name->_str)
     curr = fcont;
 }
 

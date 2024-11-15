@@ -8,6 +8,7 @@
 #include "error.h"
 #include "slice.h"
 #include "global_hdlr.h"
+#include "global_context.h"
 #include <stdlib.h>
 #include <stdbool.h>
 
