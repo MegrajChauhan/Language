@@ -13,3 +13,8 @@ void add_error(void *state, void *comp, __error_hdlr hdlr)
     check_source(curr);
     error_add_entry(curr->err, state, comp, hdlr);
 }
+
+file_context *get_current_file_context()
+{
+    return curr;
+}

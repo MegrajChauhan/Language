@@ -40,4 +40,6 @@ size_t slice_hash(void *sl, size_t bucket_count);
 
 size_t slice_hash_str(void *sl, size_t bucket_count);
 
+void slice_print(slice *sl, char* fmt);
+
 #endif

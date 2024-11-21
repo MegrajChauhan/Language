@@ -91,5 +91,19 @@ size_t slice_hash(void *sl, size_t bucket_count)
 // for string contexts
 size_t slice_hash_str(void *sl, size_t bucket_count)
 {
-   return string_hash(((slice*)sl)->_str, bucket_count);
+    return string_hash(((slice *)sl)->_str, bucket_count);
+}
+
+void slice_print(slice *sl, char *fmt)
+{
+    // print a slice and color it with "fmt" color
+    check_source(fmt);
+    char *st = sl->st;
+    printf("%s", fmt);
+    while (st != sl->ed)
+    {
+        putchar(*st);
+        st++;
+    }
+    printf("%s", RESET);
 }

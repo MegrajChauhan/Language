@@ -56,6 +56,9 @@ bool next_token(lexer *l, token *t)
             return get_number(l, t);
         else if (IsAlpha(l->curr) ||l->curr == '_')
            return get_identifier(l, t);
+        else{
+            // invalid token
+        }
     }
     return false;
 }
