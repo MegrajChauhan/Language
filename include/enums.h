@@ -23,6 +23,7 @@ enum error_t
 {
     __INVALID_FLOATING_POINT_NUMBER,
     __INVALID_NUMBER_BASE_TYPE,
+    __INVALID_TOKEN,
 };
 
 #define KEYWORD_COUNT 10

@@ -38,4 +38,6 @@ void file_context_destroy(void *fcont);
 
 bool file_context_add_child(file_context *fcont);
 
+bool file_context_parse(file_context *fcont);
+
 #endif

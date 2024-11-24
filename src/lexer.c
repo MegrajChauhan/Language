@@ -11,6 +11,7 @@ lexer *lexer_init(file *_f)
     l->col = 0;
     l->line = 1;
     l->_f = _f;
+    l->curr = *(char *)stream_read(l->_f->fdata);
     return l;
 }
 
@@ -54,10 +55,14 @@ bool next_token(lexer *l, token *t)
         }
         else if (IsNum(l->curr))
             return get_number(l, t);
-        else if (IsAlpha(l->curr) ||l->curr == '_')
-           return get_identifier(l, t);
-        else{
-            // invalid token
+        else if (IsAlpha(l->curr) || l->curr == '_')
+            return get_identifier(l, t);
+        else
+        {
+            slice tmp;
+            tmp.st = (char*)stream_at(s);
+            lexer_add_error(l, __INVALID_TOKEN, &tmp, __unknown_token);
+            return false;
         }
     }
     return false;
@@ -195,10 +200,10 @@ bool get_identifier(lexer *l, token *t)
     // For an identifier, the rules are the same as in C
     t->col = l->col;
     t->line = l->line;
-    t->value.st = (char*)stream_at(l->_f->fdata);
+    t->value.st = (char *)stream_at(l->_f->fdata);
     while (stream_has_more(l->_f->fdata) && IsIdenNameInclusive(l->curr))
         update_lexer(l);
-    t->value.ed = (char*)stream_at(l->_f->fdata);
+    t->value.ed = (char *)stream_at(l->_f->fdata);
     t->kind = is_a_key(&t->value);
     return true;
 }

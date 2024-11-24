@@ -10,4 +10,6 @@
 
 void print_filename_and_details(slice *filename, size_t col, size_t line, char *msg);
 
+void print_line_with_highlight(char *st, char *highlight_st, char *highlight_ed);
+
 #endif

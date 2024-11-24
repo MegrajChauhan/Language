@@ -59,5 +59,8 @@ bool add_base_file_context(file_context *base)
 
 bool compile()
 {
+    check_ptr(cont, root);
+    set_current_file_conext(cont->root);
+    
     return true;
 }

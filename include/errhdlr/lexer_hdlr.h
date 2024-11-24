@@ -6,5 +6,6 @@
 
 define_errhdlr(__invalid_floating_point_number);
 define_errhdlr(__invalid_number_base_type);
+define_errhdlr(__unknown_token);
 
 #endif

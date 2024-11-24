@@ -82,3 +82,10 @@ bool file_context_add_child(file_context *fcont)
     }
     return true;
 }
+
+bool file_context_parse(file_context *fcont)
+{
+    lexer l;
+    l.col = 0;
+    
+}

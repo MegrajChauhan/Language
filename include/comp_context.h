@@ -16,6 +16,7 @@
 #include "file_context.h"
 #include "enums.h"
 #include "keys.h"
+#include "global_hdlr.h"
 #include <stdlib.h>
 #include <stdbool.h>
 
