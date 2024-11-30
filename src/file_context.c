@@ -85,7 +85,27 @@ bool file_context_add_child(file_context *fcont)
 
 bool file_context_parse(file_context *fcont)
 {
-    lexer l;
-    l.col = 0;
-    
+    check_source(fcont);
+    check_ptr(fcont, fstream);
+
+#ifndef NO_LOG_STEPS
+    char tmp[fcont->file_name->ed - fcont->file_name->st + 1] = {0};
+    temp_slice_to_str(fcont->file_name, tmp);
+    log("Parsing file: %s", tmp);
+#endif
+
+    lexer *l = lexer_init(fcont->fstream);
+    if (!l)
+      return false;
+
+    token tok;
+    while(next_token(l, &tok))    
+    {
+        char val[tok.value.ed - tok.value.st + 1] = {0};
+        temp_slice_to_str(&tok.value, val);
+        printf("Found token: %s\n", val);
+    }
+
+    lexer_destroy(l);
+    return true;
 }

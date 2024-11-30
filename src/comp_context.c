@@ -62,5 +62,15 @@ bool compile()
     check_ptr(cont, root);
     set_current_file_conext(cont->root);
     
+    // We will use a STATE MACHINE approach here
+    set_compiler_state(START_COMPILATION);
+
+
+
     return true;
+}
+
+bool run_compiler()
+{
+    
 }

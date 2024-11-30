@@ -12,6 +12,11 @@
 #include <stdlib.h>
 
 static umap *keys = NULL;
+static compilerState_t cstate = INVALID;
+
+void set_compiler_state(compilerState_t state);
+
+compilerState_t get_compiler_state();
 
 bool populate_keys();
 

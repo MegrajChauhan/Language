@@ -47,6 +47,8 @@ bool file_already_exists(slice *file_path);
 
 bool compile();
 
+bool run_compiler();
+
 void destroy_compilation_context();
 
 #endif

@@ -24,4 +24,10 @@
 #define fmt_log(fmt, ...)
 #endif
 
+#define COMPILER_DEBUG /// TODO: Remove this
+
+#ifdef COMPILER_DEBUG
+#define assert(cond) do{if (!cond){fmt_log()}}while(0);
+#endif
+
 #endif

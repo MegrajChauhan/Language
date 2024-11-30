@@ -21,3 +21,13 @@ void destroy_keys()
     umap_destroy(keys);
     keys = NULL;
 }
+
+void set_compiler_state(compilerState_t state)
+{
+    cstate = state;
+}
+
+compilerState_t get_compiler_state()
+{
+    return cstate;
+}

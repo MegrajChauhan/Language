@@ -3,6 +3,15 @@
 
 typedef enum token_t token_t;
 typedef enum error_t error_t;
+typedef enum compilerState_t compilerState_t;
+
+enum compilerState_t
+{
+    START_COMPILATION,
+    CHILDREN_AVAI,
+    DONE_COMPILING,
+    INVALID,
+};
 
 enum token_t
 {
@@ -16,7 +25,7 @@ enum token_t
     TOK_IDENTIFIER,
 
     TOK_FIRST_KEY, // Pseudo key
-    TOK_LAST_KEY, // Pseudo key
+    TOK_LAST_KEY,  // Pseudo key
 };
 
 enum error_t

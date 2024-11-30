@@ -24,6 +24,12 @@ union slice
     char *_str; // We have to do this
 };
 
+#define temp_slice_to_str(sl, str)              \
+    do                                          \
+    {                                           \
+        memcpy(str, sl->_str, sl->ed - sl->st); \
+    } while (0)
+
 // we won't necessarily store allocated slices while compiling but just in case
 slice *slice_create(char *st, char *ed);
 
@@ -40,6 +46,6 @@ size_t slice_hash(void *sl, size_t bucket_count);
 
 size_t slice_hash_str(void *sl, size_t bucket_count);
 
-void slice_print(slice *sl, char* fmt);
+void slice_print(slice *sl, char *fmt);
 
 #endif
