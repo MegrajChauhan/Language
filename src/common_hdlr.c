@@ -1,5 +1,10 @@
 #include "common_hdlr.h"
 
+void set_printer_state(bool put_tab)
+{
+    _print_tab = put_tab;
+}
+
 void print_filename_and_details(slice *filename, size_t col, size_t line, char *msg)
 {
     slice_print(filename, BOLDWHITE);
@@ -8,6 +13,8 @@ void print_filename_and_details(slice *filename, size_t col, size_t line, char *
 
 void print_line_with_highlight(char *st, char *highlight_st, char *highlight_ed)
 {
+    if (_print_tab)
+        printf("\t");
     while (st != highlight_st)
     {
         putchar(*st);
@@ -19,10 +26,12 @@ void print_line_with_highlight(char *st, char *highlight_st, char *highlight_ed)
         putchar(*st);
         st++;
     }
-    printf("%s\n", RESET);
+    printf("%s", RESET);
     while (*st != '\n' && *st != '\0')
     {
         putchar(*st);
         st++;
     }
+    printf("\n");
+    printf("\n");
 }

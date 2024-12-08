@@ -89,23 +89,35 @@ bool file_context_parse(file_context *fcont)
     check_ptr(fcont, fstream);
 
 #ifndef NO_LOG_STEPS
-    char tmp[fcont->file_name->ed - fcont->file_name->st + 1] = {0};
+    char tmp[fcont->file_name->ed - fcont->file_name->st + 1];
     temp_slice_to_str(fcont->file_name, tmp);
-    log("Parsing file: %s", tmp);
+    tmp[fcont->file_name->ed - fcont->file_name->st] = 0;
+    fmt_log("Parsing file: %s\n", tmp);
 #endif
 
     lexer *l = lexer_init(fcont->fstream);
     if (!l)
-      return false;
-
-    token tok;
-    while(next_token(l, &tok))    
     {
-        char val[tok.value.ed - tok.value.st + 1] = {0};
-        temp_slice_to_str(&tok.value, val);
-        printf("Found token: %s\n", val);
+        set_compiler_state(INVALID);
+        return false;
     }
 
+    token tok;
+    while (true)
+    {
+        next_token(l, &tok);
+        if (tok.kind == TOK_EOF)
+            break;
+        char val[tok.value.ed - tok.value.st + 1];
+        slice *__ = &tok.value;
+        temp_slice_to_str(__, val);
+        val[tok.value.ed - tok.value.st] = 0;
+        printf("Found token: %s\n", val);
+        printf("Token type: %d\n\n", tok.kind);
+    }
     lexer_destroy(l);
+
+    if (get_compiler_state() == INVALID)
+        return false;
     return true;
 }

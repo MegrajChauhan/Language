@@ -60,8 +60,10 @@ bool next_token(lexer *l, token *t)
         else
         {
             slice tmp;
-            tmp.st = (char*)stream_at(s);
+            tmp.st = (char *)stream_at(s);
             lexer_add_error(l, __INVALID_TOKEN, &tmp, __unknown_token);
+            set_compiler_state(INVALID);
+            update_lexer(l);
             return false;
         }
     }
@@ -77,6 +79,8 @@ token_t identify_number_type(lexer *l)
     {
         // could be anything
         char peek = *(char *)stream_peek(l->_f->fdata, 1);
+        slice tmp;
+        tmp.st = (char *)stream_at(l->_f->fdata);
         switch (peek)
         {
         case 'x':
@@ -89,9 +93,9 @@ token_t identify_number_type(lexer *l)
             return TOK_NUM_DECIMAL; // just to make things complete
         default:
         {
-            slice tmp;
-            tmp.st = (char *)stream_at(l->_f->fdata);
+            tmp.ed = tmp.st + 2;
             lexer_add_error(l, __INVALID_NUMBER_BASE_TYPE, &tmp, __invalid_number_base_type);
+            set_compiler_state(INVALID);
             return TOK_ERROR;
         }
         }
@@ -99,6 +103,7 @@ token_t identify_number_type(lexer *l)
     default:
         return TOK_NUM_DECIMAL;
     }
+    set_compiler_state(INVALID);
     return TOK_ERROR;
 }
 
@@ -115,7 +120,9 @@ bool handle_decimal(lexer *l, token *t)
             dot_count++;
         if (dot_count > 1)
         {
+            t->value.ed = (char *)stream_at(l->_f->fdata);
             lexer_add_error(l, __INVALID_FLOATING_POINT_NUMBER, &t->value, __invalid_floating_point_number);
+            set_compiler_state(INVALID);
             return false;
         }
         update_lexer(l);
@@ -134,6 +141,8 @@ bool handle_binary(lexer *l, token *t)
     t->col = l->col;
     t->line = l->line;
     t->value.st = (char *)stream_at(l->_f->fdata);
+    update_lexer(l);
+    update_lexer(l);
     while (stream_has_more(l->_f->fdata) && (l->curr == '0' || l->curr == '1'))
     {
         update_lexer(l);
@@ -149,9 +158,11 @@ bool handle_hex(lexer *l, token *t)
     t->col = l->col;
     t->line = l->line;
     t->value.st = (char *)stream_at(l->_f->fdata);
-    while (stream_has_more(l->_f->fdata) && (IsNum(l->curr) || ((l->curr >= 'A' && l->curr <= 'Z') || (l->curr >= 'a' && l->curr <= 'z'))))
+    update_lexer(l);
+    update_lexer(l);
+    while (stream_has_more(l->_f->fdata) && (IsNum(l->curr) || ((l->curr >= 'A' && l->curr <= 'F') || (l->curr >= 'a' && l->curr <= 'f'))))
     {
-        if ((l->curr >= 'a' && l->curr <= 'z'))
+        if ((l->curr >= 'a' && l->curr <= 'f'))
             *(char *)stream_at(l->_f->fdata) = l->curr - 32;
         update_lexer(l);
     }
@@ -166,6 +177,8 @@ bool handle_oct(lexer *l, token *t)
     t->col = l->col;
     t->line = l->line;
     t->value.st = (char *)stream_at(l->_f->fdata);
+    update_lexer(l);
+    update_lexer(l);
     while (stream_has_more(l->_f->fdata) && (IsNum(l->curr) && (l->curr != '8' || l->curr != '9')))
     {
         if ((l->curr >= 'a' && l->curr <= 'z'))

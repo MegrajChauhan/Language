@@ -4,6 +4,7 @@
 #include "file_context.h"
 #include "lexer_hdlr.h"
 
+// The current file being worked upon
 static file_context *curr = NULL;
 
 void set_current_file_conext(file_context *fcont);

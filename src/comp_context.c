@@ -57,20 +57,79 @@ bool add_base_file_context(file_context *base)
     return true;
 }
 
+void handle_invalid_state()
+{
+    // The compiler will crash based on the situation here
+    // If not initialized, exit with proper message
+    // else, print the messages and continue
+
+    // It is not possible that the compiler is unintialized
+    // So, we can just go to errors
+    file_context *current_context = get_current_file_context();
+    error_handle(current_context->err);
+
+    if (current_context->err->_fatality)
+        crash();
+    set_assumed_state_as_compiler_state(); // try to restore the compiler
+}
+
 bool compile()
 {
     check_ptr(cont, root);
     set_current_file_conext(cont->root);
-    
+
+    log("Starting Compilation...\n");
+
     // We will use a STATE MACHINE approach here
     set_compiler_state(START_COMPILATION);
 
+    /**
+     * The way this works is that we go step by step for the current file
+     * The work on the current file will update the state of the compiler
+     * Based on that state, the compilation keeps going
+     */
+    while (true)
+    {
+        switch (get_compiler_state())
+        {
+        case INVALID: // Error encountered
+            log("Compiler Entered Invalid State\n");
+            handle_invalid_state();
+            break;
+        case START_COMPILATION:
+            log("Compiler Entered Compilation State\n");
+            handle_start_compilation_state();
+            break;
+        case PARSE:
+            log("Compiler Entered Parsing State\n");
+            handle_parse_state();
+            break;
+        case DONE_COMPILING:
+            goto _exit_;
+        }
+    }
 
-
+_exit_:
     return true;
 }
 
 bool run_compiler()
 {
-    
+}
+
+void handle_start_compilation_state()
+{
+    // This is very simple.
+    // We just start parsing
+    set_compiler_state(PARSE);
+}
+
+void handle_parse_state()
+{
+    set_assumed_state(DONE_COMPILING); // set the next state first(for now 'done')
+    file_context *current_fcont = get_current_file_context();
+    if (!file_context_parse(current_fcont))
+        return;
+    // Do some post-parse things here
+    set_assumed_state_as_compiler_state(); // make the next step the current step
 }

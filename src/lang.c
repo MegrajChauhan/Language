@@ -21,6 +21,7 @@ bool lang_main(int argc, char **argv)
     }
     // For now, argv[1] will have the file name
     char *inp_file = argv[1];
+    // char *inp_file = "examples/test.l";
 
     fmt_log("Creating PARENT file context[Input File: '%s']\n", inp_file);
     file_context *inp_cont = file_context_create(NULL);

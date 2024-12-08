@@ -31,3 +31,13 @@ compilerState_t get_compiler_state()
 {
     return cstate;
 }
+
+void set_assumed_state(compilerState_t state)
+{
+    assumed_next_state = state;
+}
+
+void set_assumed_state_as_compiler_state()
+{
+    cstate = assumed_next_state;
+}

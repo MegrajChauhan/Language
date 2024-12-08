@@ -34,12 +34,14 @@ void error_add_entry(error *e, void *state, void *component, __error_hdlr hdlr)
 
 void error_handle(error *e)
 {
+    set_printer_state(true);
     while (!queue_is_empty(e->errors))
     {
         _error_entry *ent = queue_dequeue(e->errors);
-        ent->hdlr(ent->state, ent->component);
+        e->_fatality = ent->hdlr(ent->state, ent->component);
         free(ent);
     }
+    set_printer_state(false);
 }
 
 void error_destroy(error *e)

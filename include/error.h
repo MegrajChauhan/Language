@@ -4,12 +4,13 @@
 #include "queue.h"
 #include "report.h"
 #include "utils.h"
+#include "common_hdlr.h"
 #include <stdlib.h>
 #include <stdbool.h>
 
 typedef struct _error_entry _error_entry;
 typedef struct error error;
-typedef void (*__error_hdlr)(void *state, void *comp);
+typedef bool (*__error_hdlr)(void *state, void *comp);
 
 struct _error_entry
 {
@@ -21,6 +22,7 @@ struct _error_entry
 struct error
 {
     queue *errors;
+    bool _fatality;
 };
 
 error *error_init();

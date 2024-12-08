@@ -1,4 +1,4 @@
-# Contributing to GNOME-Nepal
+# Contributing to lang Programming Language
 
 Thank you for showing an interest in contributing to Evaluate It! All kinds of contributions are valuable to us. In this guide, we will cover how you can quickly onboard and make your first contribution.
 

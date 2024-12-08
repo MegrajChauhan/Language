@@ -8,6 +8,7 @@ typedef enum compilerState_t compilerState_t;
 enum compilerState_t
 {
     START_COMPILATION,
+    PARSE,
     CHILDREN_AVAI,
     DONE_COMPILING,
     INVALID,

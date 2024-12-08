@@ -51,4 +51,10 @@ bool run_compiler();
 
 void destroy_compilation_context();
 
+void handle_invalid_state();
+
+void handle_start_compilation_state();
+
+void handle_parse_state();
+
 #endif

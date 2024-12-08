@@ -71,7 +71,7 @@ void *stream_peek(stream *strm, size_t off)
     check_ptr(strm, buffer);
     if ((strm->read_ptr + off) > strm->elem_count)
         return NULL;
-    return ((char *)strm->buffer + strm->elem_len * (strm->read_ptr + off));
+    return ((char *)strm->buffer + strm->elem_len * (strm->read_ptr + off-1));
 }
 
 void stream_reset(stream *strm)

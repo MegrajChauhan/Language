@@ -6,7 +6,12 @@
 #include "report.h"
 #include <stdio.h>
 
-#define define_errhdlr(name) void name(void *state, void *comp)
+#define define_errhdlr(name) bool name(void *state, void *comp)
+
+// Define how the lines should be printed
+static bool _print_tab = false;
+
+void set_printer_state(bool put_tab);
 
 void print_filename_and_details(slice *filename, size_t col, size_t line, char *msg);
 
