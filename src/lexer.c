@@ -41,7 +41,7 @@ bool next_token(lexer *l, token *t)
     stream *s = l->_f->fdata;
     while (true)
     {
-        if (!stream_has_more(s))
+        if (l->curr == '\0')
         {
             t->col = l->col;
             t->line = l->line;

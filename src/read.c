@@ -61,10 +61,11 @@ file *file_read(char *path)
     fseek(fd, SEEK_SET, SEEK_END);
     size_t file_len = ftell(fd);
     rewind(fd);
-    char buf[file_len];
+    char buf[file_len+1];
     fread(buf, 1, file_len, fd);
+    buf[file_len]=0;
 
-    if ((f->fdata = stream_create(1, file_len)) == NULL)
+    if ((f->fdata = stream_create(1, file_len+1)) == NULL)
     {
         free(f);
         fclose(fd);
