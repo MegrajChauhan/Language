@@ -3,6 +3,7 @@
 
 int main(int argc, char **argv)
 {
+  // char *c[] = {"aa", "examples/test.l"};
   if (!lang_main(argc, argv))
   {
     fmt_log("UNSUCCESSFUL COMPILATION TERMINATION...\n", NULL);

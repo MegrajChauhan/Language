@@ -31,6 +31,8 @@ void update_lexer(lexer *l)
             l->col = 0;
             l->line++;
         }
+        else
+            l->col++;
         l->curr = *(char *)stream_read(l->_f->fdata);
     }
 }
@@ -121,7 +123,10 @@ bool handle_decimal(lexer *l, token *t)
         if (dot_count > 1)
         {
             t->value.ed = (char *)stream_at(l->_f->fdata);
+            size_t temp = l->col;
+            l->col = 0; 
             lexer_add_error(l, __INVALID_FLOATING_POINT_NUMBER, &t->value, __invalid_floating_point_number);
+            l->col = temp;
             set_compiler_state(INVALID);
             return false;
         }
