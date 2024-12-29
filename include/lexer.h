@@ -9,6 +9,7 @@
 #include "slice.h"
 #include "global_hdlr.h"
 #include "global_context.h"
+#include "base.h"
 #include <stdlib.h>
 #include <stdbool.h>
 
@@ -16,7 +17,7 @@ typedef struct token token;
 typedef struct lexer lexer;
 
 // lexer state
-typedef struct lexer_state lexer_state;
+typedef base_state lexer_state;
 
 struct token
 {
@@ -30,13 +31,6 @@ struct lexer
     file *_f;
     size_t line, col;
     char curr;
-};
-
-struct lexer_state
-{
-    error_t kind;
-    size_t line, col;
-    slice val;
 };
 
 lexer *lexer_init(file *_f);
