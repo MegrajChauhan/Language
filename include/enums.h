@@ -4,6 +4,7 @@
 typedef enum token_t token_t;
 typedef enum error_t error_t;
 typedef enum compilerState_t compilerState_t;
+typedef enum node_t node_t;
 
 enum compilerState_t
 {
@@ -34,6 +35,11 @@ enum error_t
     __INVALID_FLOATING_POINT_NUMBER,
     __INVALID_NUMBER_BASE_TYPE,
     __INVALID_TOKEN,
+};
+
+enum node_t
+{
+    _
 };
 
 #define KEYWORD_COUNT 10
