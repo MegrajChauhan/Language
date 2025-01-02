@@ -15,13 +15,8 @@
 #include "lexer.h"
 #include "error.h"
 #include "vec.h"
+#include "ast.h"
 
-typedef struct ast ast;
-typedef struct ast_node ast_node;
 
-struct ast_node
-{
-    token tok;
-};
 
 #endif
