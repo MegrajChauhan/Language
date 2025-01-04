@@ -16,7 +16,12 @@
 #include "error.h"
 #include "vec.h"
 #include "ast.h"
+#include "global_hdlr.h"
 
+// Use the current file context and parse
+// Make a call to this function once the current token is part of an expression 
+ast *parse_ast(vec *expr);
 
+bool build_ast_from_root(ast *tree, vec *expr);
 
 #endif

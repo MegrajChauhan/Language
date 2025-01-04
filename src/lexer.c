@@ -59,8 +59,70 @@ bool next_token(lexer *l, token *t)
             return get_number(l, t);
         else if (IsAlpha(l->curr) || l->curr == '_')
             return get_identifier(l, t);
+        else if (l->curr == '+')
+        {
+            // for now just check if the next token is '+' or not
+            // We will need to extend this for when we add '+=' or other operators
+            char *next = (char *)stream_peek(s, 1);
+            t->col = l->col;
+            t->line = l->line;
+            t->value.st = next--;
+            if (next)
+            {
+                switch (*next)
+                {
+                case '+':
+                {
+                    t->kind = TOK_INC;
+                    t->value.ed = next++;
+                    update_lexer(l); // next token has been consumed
+                    break;
+                }
+                default:
+                    // assume it as just a PLUS and continue
+                    t->kind = TOK_PLUS;
+                    t->value.ed = next;
+                    break;
+                }
+                update_lexer(l);
+                return true;
+            }
+        }
+        else if (l->curr == '-')
+        {
+            // for now just check if the next token is '+' or not
+            // We will need to extend this for when we add '+=' or other operators
+            char *next = (char *)stream_peek(s, 1);
+            t->col = l->col;
+            t->line = l->line;
+            t->value.st = next--;
+            if (next)
+            {
+                switch (*next)
+                {
+                case '+':
+                {
+                    t->kind = TOK_INC;
+                    t->value.ed = next++;
+                    update_lexer(l); // next token has been consumed
+                    break;
+                }
+                default:
+                    // assume it as just a PLUS and continue
+                    t->kind = TOK_PLUS;
+                    t->value.ed = next;
+                    break;
+                }
+                update_lexer(l);
+                return true;
+            }
+        }
         else
         {
+            switch(l->curr)
+            {
+                
+            }
             slice tmp;
             tmp.st = (char *)stream_at(s);
             lexer_add_error(l, __INVALID_TOKEN, &tmp, __unknown_token);
@@ -124,7 +186,7 @@ bool handle_decimal(lexer *l, token *t)
         {
             t->value.ed = (char *)stream_at(l->_f->fdata);
             size_t temp = l->col;
-            l->col = 0; 
+            l->col = 0;
             lexer_add_error(l, __INVALID_FLOATING_POINT_NUMBER, &t->value, __invalid_floating_point_number);
             l->col = temp;
             set_compiler_state(INVALID);
