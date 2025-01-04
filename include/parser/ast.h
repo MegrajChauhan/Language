@@ -9,14 +9,28 @@ typedef struct ast_node ast_node;
 
 struct ast_node
 {
-    ast_node left;
-    ast_node right;
+    union
+    {
+        struct
+        {
+            ast_node *left;
+            ast_node *right;
+        } leaves;
+        ast *child;
+    } __;
     token node_token;
+    bool _is_child;
 };
 
 struct ast
 {
-    ast_node root;
+    ast_node *root;
 };
+
+void clean_ast_node(ast_node *n);
+
+void clean_ast(ast *tree);
+
+ast_node *produce_new_node();
 
 #endif

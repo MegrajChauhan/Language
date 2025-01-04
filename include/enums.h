@@ -26,7 +26,37 @@ enum token_t
     TOK_NUM_HEX,
     TOK_IDENTIFIER,
 
+    TOK_PLUS,
+    TOK_MINUS,
+    TOK_MUL,
+    TOK_DIV,
+    TOK_MOD,
+    TOK_INC,
+    TOK_DEC,
+    TOK_SQ_BRAC_OPEN,  // [
+    TOK_SQ_BRAC_CLOSE, // ]
+    TOK_PAREN_OPEN,    // (
+    TOK_PAREN_CLOSE,   // )
+    TOK_COND_AND,      // && for conditional statements
+    TOK_COND_OR,       // || for conditional statements
+    TOK_GREATER,       // > for conditional statements
+    TOK_GREATER_OR_EQ, // >= for conditional statements
+    TOK_SMALLER,       // < for conditional statements
+    TOK_SMALLER_OR_EQ, // <= for conditional statements
+    TOK_COND_NOT,      // Logical NOT !
+    TOK_IS_EQ,         // ==
+    TOK_NOT_EQ,        // !=
+    TOK_XOR,           // Bitwise XOR ^
+    TOK_NOT,           // Bitwise NOT ~
+    TOK_AND,           // Bitwise OR |
+    TOK_OR,            // Bitwise AND &
+    TOK_LSHIFT,        // Bitwise Left Shift <<
+    TOK_RSHIFT,        // Bitwise Right Shift >>
+    TOK_TYPE_MATCHES,  // Check if the types match <>
+
     TOK_FIRST_KEY, // Pseudo key
+    TOK_TRUE,      // just '1'
+    TOK_FALSE,     // just '0'
     TOK_LAST_KEY,  // Pseudo key
 };
 
