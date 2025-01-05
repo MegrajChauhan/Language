@@ -59,76 +59,241 @@ bool next_token(lexer *l, token *t)
             return get_number(l, t);
         else if (IsAlpha(l->curr) || l->curr == '_')
             return get_identifier(l, t);
-        else if (l->curr == '+')
-        {
-            // for now just check if the next token is '+' or not
-            // We will need to extend this for when we add '+=' or other operators
-            char *next = (char *)stream_peek(s, 1);
-            t->col = l->col;
-            t->line = l->line;
-            t->value.st = next--;
-            if (next)
-            {
-                switch (*next)
-                {
-                case '+':
-                {
-                    t->kind = TOK_INC;
-                    t->value.ed = next++;
-                    update_lexer(l); // next token has been consumed
-                    break;
-                }
-                default:
-                    // assume it as just a PLUS and continue
-                    t->kind = TOK_PLUS;
-                    t->value.ed = next;
-                    break;
-                }
-                update_lexer(l);
-                return true;
-            }
-        }
-        else if (l->curr == '-')
-        {
-            // for now just check if the next token is '+' or not
-            // We will need to extend this for when we add '+=' or other operators
-            char *next = (char *)stream_peek(s, 1);
-            t->col = l->col;
-            t->line = l->line;
-            t->value.st = next--;
-            if (next)
-            {
-                switch (*next)
-                {
-                case '+':
-                {
-                    t->kind = TOK_INC;
-                    t->value.ed = next++;
-                    update_lexer(l); // next token has been consumed
-                    break;
-                }
-                default:
-                    // assume it as just a PLUS and continue
-                    t->kind = TOK_PLUS;
-                    t->value.ed = next;
-                    break;
-                }
-                update_lexer(l);
-                return true;
-            }
-        }
         else
         {
-            switch(l->curr)
+            t->col = l->col;
+            t->line = l->line;
+            t->value.st = (char *)stream_at(s);
+            switch (l->curr)
             {
-                
+            case '+':
+            {
+                update_lexer(l);
+                if (l->curr != '\0')
+                {
+                    switch (l->curr)
+                    {
+                    case '+':
+                        t->kind = TOK_INC;
+                        update_lexer(l);
+                        break;
+                    default:
+                        t->kind = TOK_PLUS;
+                    }
+                }
+                t->value.ed = (char *)stream_at(s);
+                break;
             }
-            slice tmp;
-            tmp.st = (char *)stream_at(s);
-            lexer_add_error(l, __INVALID_TOKEN, &tmp, __unknown_token);
-            set_compiler_state(INVALID);
-            update_lexer(l);
-            return false;
+            case '-':
+            {
+                update_lexer(l);
+                if (l->curr != '\0')
+                {
+                    switch (l->curr)
+                    {
+                    case '-':
+                        t->kind = TOK_DEC;
+                        update_lexer(l);
+                        break;
+                    default:
+                        t->kind = TOK_MINUS;
+                    }
+                }
+                t->value.ed = (char *)stream_at(s);
+                break;
+            }
+            case '*':
+            {
+                update_lexer(l);
+                t->kind = TOK_MUL;
+                t->value.ed = (char *)stream_at(s);
+                break;
+            }
+            case '/':
+            {
+                update_lexer(l);
+                t->kind = TOK_DIV;
+                t->value.ed = (char *)stream_at(s);
+                break;
+            }
+            case '%':
+            {
+                update_lexer(l);
+                t->kind = TOK_MOD;
+                t->value.ed = (char *)stream_at(s);
+                break;
+            }
+            case '[':
+            {
+                update_lexer(l);
+                t->kind = TOK_SQ_BRAC_OPEN;
+                t->value.ed = (char *)stream_at(s);
+                break;
+            }
+            case ']':
+            {
+                update_lexer(l);
+                t->kind = TOK_SQ_BRAC_CLOSE;
+                t->value.ed = (char *)stream_at(s);
+                break;
+            }
+            case '(':
+            {
+                update_lexer(l);
+                t->kind = TOK_PAREN_OPEN;
+                t->value.ed = (char *)stream_at(s);
+                break;
+            }
+            case ')':
+            {
+                update_lexer(l);
+                t->kind = TOK_PAREN_CLOSE;
+                t->value.ed = (char *)stream_at(s);
+                break;
+            }
+            case '&':
+            {
+                update_lexer(l);
+                if (l->curr != '\0')
+                {
+                    switch (l->curr)
+                    {
+                    case '&':
+                        t->kind = TOK_COND_AND;
+                        update_lexer(l);
+                        break;
+                    default:
+                        t->kind = TOK_AND;
+                    }
+                }
+                t->value.ed = (char *)stream_at(s);
+                break;
+            }
+            case '|':
+            {
+                update_lexer(l);
+                if (l->curr != '\0')
+                {
+                    switch (l->curr)
+                    {
+                    case '|':
+                        t->kind = TOK_COND_OR;
+                        update_lexer(l);
+                        break;
+                    default:
+                        t->kind = TOK_OR;
+                    }
+                }
+                t->value.ed = (char *)stream_at(s);
+                break;
+            }
+            case '>':
+            {
+                update_lexer(l);
+                if (l->curr != '\0')
+                {
+                    switch (l->curr)
+                    {
+                    case '=':
+                        t->kind = TOK_GREATER_OR_EQ;
+                        update_lexer(l);
+                        break;
+                    case '>':
+                        t->kind = TOK_RSHIFT;
+                        update_lexer(l);
+                        break;
+                    default:
+                        t->kind = TOK_GREATER;
+                    }
+                }
+                t->value.ed = (char *)stream_at(s);
+                break;
+            }
+            case '<':
+            {
+                update_lexer(l);
+                if (l->curr != '\0')
+                {
+                    switch (l->curr)
+                    {
+                    case '=':
+                        t->kind = TOK_SMALLER_OR_EQ;
+                        update_lexer(l);
+                        break;
+                    case '<':
+                        t->kind = TOK_LSHIFT;
+                        update_lexer(l);
+                        break;
+                    case '>':
+                        t->kind = TOK_TYPE_MATCHES;
+                        update_lexer(l);
+                        break;
+                    default:
+                        t->kind = TOK_SMALLER;
+                    }
+                }
+                t->value.ed = (char *)stream_at(s);
+                break;
+            }
+            case '!':
+            {
+                update_lexer(l);
+                if (l->curr != '\0')
+                {
+                    switch (l->curr)
+                    {
+                    case '=':
+                        t->kind = TOK_NOT_EQ;
+                        update_lexer(l);
+                        break;
+                    default:
+                        t->kind = TOK_COND_NOT;
+                    }
+                }
+                t->value.ed = (char *)stream_at(s);
+                break;
+            }
+            case '=':
+            {
+                update_lexer(l);
+                if (l->curr != '\0')
+                {
+                    switch (l->curr)
+                    {
+                    case '=':
+                        t->kind = TOK_IS_EQ;
+                        update_lexer(l);
+                        break;
+                    default:
+                        t->kind = TOK_ASSIGN;
+                    }
+                }
+                t->value.ed = (char *)stream_at(s);
+                break;
+            }
+            case '^':
+            {
+                update_lexer(l);
+                t->kind = TOK_XOR;
+                t->value.ed = (char *)stream_at(s);
+                break;
+            }
+            case '~':
+            {
+                update_lexer(l);
+                t->kind = TOK_NOT;
+                t->value.ed = (char *)stream_at(s);
+                break;
+            }
+            default:
+                slice tmp;
+                tmp.st = (char *)stream_at(s);
+                lexer_add_error(l, __INVALID_TOKEN, &tmp, __unknown_token);
+                set_compiler_state(INVALID);
+                update_lexer(l);
+                return false;
+            }
+            return true;
         }
     }
     return false;

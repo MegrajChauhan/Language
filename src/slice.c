@@ -54,7 +54,7 @@ bool slice_cmp(void *sl1, void *sl2)
         return false;
     char *iter1 = ((slice *)sl1)->st;
     char *iter2 = ((slice *)sl2)->st;
-    while (iter1 != ((slice *)sl2)->ed)
+    while (iter1 != ((slice *)sl1)->ed)
     {
         if (*iter1 != *iter2)
             return false;

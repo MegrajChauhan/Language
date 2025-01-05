@@ -26,6 +26,7 @@ enum token_t
     TOK_NUM_HEX,
     TOK_IDENTIFIER,
 
+    TOK_ASSIGN,
     TOK_PLUS,
     TOK_MINUS,
     TOK_MUL,
@@ -72,6 +73,6 @@ enum node_t
     _
 };
 
-#define KEYWORD_COUNT 10
+#define KEYWORD_COUNT 26
 
 #endif

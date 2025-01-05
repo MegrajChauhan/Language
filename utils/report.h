@@ -11,7 +11,7 @@
 #define _report_internal_error(CAUSE) report("INTERNAL ERROR: %s\n", CAUSE)
 #define report_internal_error(cause) _report_internal_error(cause) // if we can present the issue
 
-#define _fmt_internal_error(fmt, ...) report("INTERNAL ERROR:" fmt, __VA_ARGS__)
+#define _fmt_internal_error(fmt, ...) report("INTERNAL ERROR: " fmt, __VA_ARGS__)
 #define fmt_internal_error(fmt, ...) _fmt_internal_error(fmt, __VA_ARGS__) // if there is more details to be provided
 
 #ifndef NO_LOG_STEPS

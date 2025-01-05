@@ -105,15 +105,17 @@ bool file_context_parse(file_context *fcont)
     token tok;
     while (true)
     {
-        next_token(l, &tok);
-        if (tok.kind == TOK_EOF)
-            break;
-        char val[tok.value.ed - tok.value.st + 1];
-        slice *__ = &tok.value;
-        temp_slice_to_str(__, val);
-        val[tok.value.ed - tok.value.st] = 0;
-        printf("Found token: %s\n", val);
-        printf("Token type: %d\n\n", tok.kind);
+        if (next_token(l, &tok))
+        {
+            if (tok.kind == TOK_EOF)
+                break;
+            char val[tok.value.ed - tok.value.st + 1];
+            slice *__ = &tok.value;
+            temp_slice_to_str(__, val);
+            val[tok.value.ed - tok.value.st] = 0;
+            printf("Found token: %s\n", val);
+            printf("Token type: %d\n\n", tok.kind);
+        }
     }
     lexer_destroy(l);
 
