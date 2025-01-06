@@ -2,20 +2,22 @@
 
 ast *parse_ast(vec *expr)
 {
+    check_ptr(expr, buffer);
+    token curr = *(token*)vec_at(expr, 0);
     file_context *current = get_current_file_context();
     fmt_log("PARSING EXPRESSION: In Line %lu.\n", curr.line);
     ast *tree = (ast *)malloc(sizeof(ast));
     if (!tree)
     {
         fmt_internal_error("Failed to parse the expression at line %lu[FAILED TO ALLOCATE MEMORY].\n", curr.line);
-        fmt_log("Failed to parse expression\n");
+        log("Failed to parse expression\n");
         return NULL;
     }
 
     if (!(tree->root = produce_new_node()))
     {
         report_internal_error("Failed to parse expressions.");
-        fmt_log("Failed to parse expression\n");
+        log("Failed to parse expression\n");
         free(tree);
         return NULL;
     }

@@ -16,6 +16,13 @@ static umap *keys = NULL;
 static compilerState_t cstate = INVALID;
 static compilerState_t assumed_next_state = INVALID;
 
+static char *_key_values_[] = {
+    "true",
+    "false",
+};
+
+static slice _keys[(size_t)(TOK_LAST_KEY - TOK_FIRST_KEY) - 1];
+
 void set_compiler_state(compilerState_t state);
 
 void set_assumed_state(compilerState_t state);
