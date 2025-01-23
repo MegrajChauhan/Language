@@ -17,8 +17,7 @@ struct base_state
 
 struct base_note
 {
-    vec *note_msg;  // extra note messages
-    vec *green_msg; // try to correct the error for the user
+    char *note_msg;
 };
 
 #endif

@@ -30,4 +30,7 @@
 #define ASSUME_FILE_CONTEXT_MAP_BUCKET_COUNT 12
 #endif
 
+// The number of notes an error message could produce
+#define ASSUMED_MAX_NOTES 3
+
 #endif

@@ -20,8 +20,11 @@
 
 // Use the current file context and parse
 // Make a call to this function once the current token is part of an expression 
-ast *parse_ast(vec *expr);
+ast *parse_ast(vec *expr, parser_state *st);
 
-bool build_ast_from_root(ast *tree, vec *expr);
+bool build_ast_from_root(ast *tree, vec *expr, parser_state *st);
+
+// We ignore () and [] here
+size_t find_next_ast_node(vec *expr, parser_state *st);
 
 #endif

@@ -3,4 +3,5 @@ a.out
 .vscode
 main
 temp.c
+*.py
 test.c
